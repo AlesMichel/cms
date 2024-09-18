@@ -1,0 +1,13 @@
+{
+  "name": "phpcms/core",
+  "description": "Modular PHP CMS",
+  "type": "project",
+  "require": {
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "phpCms\\": "src/"
+    }
+  }
+}
