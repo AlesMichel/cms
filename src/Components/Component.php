@@ -1,7 +1,7 @@
 <?php
 
 namespace phpCms\Components;
-
+//common components class
 abstract class Component
 {
     protected $name;
