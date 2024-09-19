@@ -1,0 +1,4 @@
+1. safe import using PDO not sqlquerry
+2. https://www.projectseven.net/php-content-security-policy.php
+- safe boostrap import for e.g.
+3. new file for users
