@@ -6,34 +6,34 @@ include("../templates/header.php");
     include("../../src/DbConnect/connect.php");
     $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
     $moduleName = $_GET["name"];
-if ($moduleName) {
-
-
-    try {
-        $checkTableQuery = "SHOW TABLES LIKE :tableName";
-        $stmtCheckTable = $db->prepare($checkTableQuery);
-        $stmtCheckTable->execute(["tableName" => $moduleName]);
-        $tableExists = $stmtCheckTable->fetch(PDO::FETCH_ASSOC);
-
-        if ($tableExists) {
-//            echo "Table $moduleName exists";
-            echo "Module name: $moduleName";
-
-            $sqlGetData = "SELECT * FROM `$moduleName`";
-            $stmtGetData = $db->prepare($sqlGetData);
-            $stmtGetData->execute();
-
-            $data = $stmtGetData->fetchAll(PDO::FETCH_ASSOC);
-
-
-        } else {
-            echo "Table $moduleName does not exist";
-        }
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
-    }
-
-}
+//if ($moduleName) {
+//
+//
+//    try {
+//        $checkTableQuery = "SHOW TABLES LIKE :tableName";
+//        $stmtCheckTable = $db->prepare($checkTableQuery);
+//        $stmtCheckTable->execute(["tableName" => $moduleName]);
+//        $tableExists = $stmtCheckTable->fetch(PDO::FETCH_ASSOC);
+//
+//        if ($tableExists) {
+////            echo "Table $moduleName exists";
+//            echo "Module name: $moduleName";
+//
+//            $sqlGetData = "SELECT * FROM `$moduleName`";
+//            $stmtGetData = $db->prepare($sqlGetData);
+//            $stmtGetData->execute();
+//
+//            $data = $stmtGetData->fetchAll(PDO::FETCH_ASSOC);
+//
+//
+//        } else {
+//            echo "Table $moduleName does not exist";
+//        }
+//    } catch (PDOException $e) {
+//        echo "Error: " . $e->getMessage();
+//    }
+//
+//}
 
 echo "<div class='create-form w-100 mx-auto p-4' style='max-width: 700px;'>
     <form action='process.php' method='post' enctype='multipart/form-data'>

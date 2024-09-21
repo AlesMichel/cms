@@ -45,9 +45,9 @@ class module
             }
             //module name does not exit so we proceed to inserting module name into database
 
-                $sql = "INSERT INTO `modules` (moduleName, moduleTableName) VALUES (:moduleName, :moduleTableName)";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute([':moduleName' => $this->name, ':moduleTableName' => $this->tableName]);
+            $sql = "INSERT INTO `modules` (moduleName, moduleTableName) VALUES (:moduleName, :moduleTableName)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':moduleName' => $this->name, ':moduleTableName' => $this->tableName]);
 
 
         } catch (PDOException $e) {
@@ -89,7 +89,56 @@ class module
         //deletes module table based on modules->moduleTableName
 
         //first we try to find the moduleTableName
+//        try {
+//            $sql = "SELECT moduleTableName FROM `modules` WHERE moduleName = :moduleName";
+//            $stmt = $db->prepare($sql);
+//            $stmt->execute([':moduleName' => $moduleName]);
+//            $moduleTableName = '';
+//            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+//            if ($result) {
+//                $moduleTableName = $result['moduleTableName'];
+//
+//            } else {
+//                echo "Module table not found";
+//            }
+//            find module table name
+        $moduleTableName = self::findModuleByName($moduleName, $db);
+
+        if ($moduleTableName != '') {
+            //module table name found, now search for the actual table
+            //now we can delete the entry in modules table
+
+            try {
+                $sql = "DELETE FROM `modules` WHERE moduleName = :moduleName";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([':moduleName' => $moduleName]);
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+                echo "Entry with module table cannot be deleted";
+                exit();
+            }
+            //now we can delete the module table
+            try {
+                $sql = "DROP TABLE IF EXISTS `$moduleTableName`";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+                echo "Module table cannot be delete";
+                exit();
+            }
+        } else {
+            echo "Module table does not exists";
+        }
+
+        return true;
+    }
+
+    public static function findModuleByName(string $moduleName, PDO $db)
+    {
+
         try {
+            //find module table name from table modules
             $sql = "SELECT moduleTableName FROM `modules` WHERE moduleName = :moduleName";
             $stmt = $db->prepare($sql);
             $stmt->execute([':moduleName' => $moduleName]);
@@ -97,57 +146,15 @@ class module
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($result) {
                 $moduleTableName = $result['moduleTableName'];
-
             } else {
-                echo "Module does not exist";
+                echo "findModuleByName::Name of module table not found";
             }
-
-            //module table name found, now search for the actual table
-            if ($moduleTableName != '') {
-                $moduleTableExists = self::findModuleByName($moduleTableName, $db);
-                //now we can delete the entry in modules table
-                if ($moduleTableExists) {
-
-                    try {
-                        $sql = "DELETE FROM `modules` WHERE moduleName = :moduleName";
-                        $stmt = $db->prepare($sql);
-                        $stmt->execute([':moduleName' => $moduleName]);
-                    } catch (PDOException $e) {
-                        echo "Error: " . $e->getMessage();
-                        echo "Entry with module table cannot be deleted";
-                        exit();
-                    }
-                    //now we can delete the module table
-                    try {
-                        $sql = "DROP TABLE IF EXISTS `$moduleTableName`";
-                        $stmt = $db->prepare($sql);
-                        $stmt->execute();
-                    } catch (PDOException $e) {
-                        echo "Error: " . $e->getMessage();
-                        echo "Module table cannot be delete";
-                        exit();
-                    }
-                } else {
-                    echo "Module table does not exists";
-                }
-            }
-
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            exit();
-        }
-        return true;
-    }
-
-    public static function findModuleByName(string $moduleTableName, PDO $db): bool
-    {
-
-        try {
+            //find modules table in DB
             $queryCheck = $db->prepare("SHOW TABLES LIKE :tableName");
             $queryCheck->execute([':tableName' => $moduleTableName]);
             $tableExists = $queryCheck->fetch();
             if ($tableExists) {
-                return true;
+                return $moduleTableName;
             }
 
         } catch (PDOException $e) {

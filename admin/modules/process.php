@@ -32,6 +32,12 @@ if(isset($_POST["delete"])){
         echo "module not deleted";
     }
 
+
+}
+if(isset($_POST["view"])){
+    echo $_POST["moduleName"];
+    $moduleName = $_POST["moduleName"];
+
 }
 
 

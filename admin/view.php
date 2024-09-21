@@ -3,11 +3,15 @@ include("templates/header.php");
 
 $id = $_GET["id"];
 if ($id) {
-    include("../connect.php");
+    //connect to db
+    include("../src/DbConnect/connect.php");
+    $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+
+
 
     // Fetch post details
     $sqlSelectPost = "SELECT * FROM posts WHERE posts_id = ?";
-    $stmtPost = $pdo->prepare($sqlSelectPost);
+    $stmtPost = $db->prepare($sqlSelectPost);
     $stmtPost->bindParam(1, $id);
     $stmtPost->execute();
     $post = $stmtPost->fetch(PDO::FETCH_ASSOC);
@@ -15,10 +19,10 @@ if ($id) {
     if ($post) {
         // Fetch image details
         $sqlSelectImage = "SELECT id, name, data FROM images WHERE id=?";
-        $stmtImage = $pdo->prepare($sqlSelectImage);
+        $stmtImage = $db->prepare($sqlSelectImage);
         $stmtImage->bindParam(1, $id);
         $stmtImage->execute();
-        $imgSrc = $stmtImage->fetch(PDO::FETCH_ASSOC);
+        $imgSrc = $stmtImage->fetch();
         ?>
         <div class="post w-100 bg-light p-5">
             <h1><?php echo $post['title'] ?></h1>

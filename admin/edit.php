@@ -1,5 +1,11 @@
 <?php
-include("templates/header.php");
+// Include Composer's autoloader
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use phpCms\DbConnect\connect;
+
+// Example usage
+$db = connect::getInstance()->getConnection();
 ?>
 
     <?php
@@ -7,7 +13,7 @@ include("templates/header.php");
         if($id){
             include("../connect.php");
             $sqlEdit = "SELECT * FROM posts WHERE posts_id = $id";
-            $result = mysqli_query($conn, $sqlEdit);
+            $result = mysqli_query($db, $sqlEdit);
 
         }else{
             echo "No post found";

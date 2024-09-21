@@ -1,7 +1,8 @@
 <?php
 session_start();
 
-include("../connect.php");
+include("../src/DbConnect/connect.php");
+$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 
 if (isset($_POST["create"])) {
     $title = $_POST["title"];
@@ -11,11 +12,11 @@ if (isset($_POST["create"])) {
 
     // Insert the post
     $sqlInsert = "INSERT INTO posts(date, title, summary, content) VALUES (?, ?, ?, ?)";
-    $stmtInsert = $pdo->prepare($sqlInsert);
+    $stmtInsert = $db->prepare($sqlInsert);
 
     try {
         $stmtInsert->execute([$date, $title, $summary, $content]);
-        $postId = $pdo->lastInsertId();
+        $postId = $db->lastInsertId();
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $name = $_FILES['image']['name'];
@@ -23,7 +24,7 @@ if (isset($_POST["create"])) {
 
             // Insert the image data
             $sqlImageInsert = "INSERT INTO images (id, name, data) VALUES (?, ?, ?)";
-            $stmtImageInsert = $pdo->prepare($sqlImageInsert);
+            $stmtImageInsert = $db->prepare($sqlImageInsert);
 
             $stmtImageInsert->bindParam(1, $postId, PDO::PARAM_INT);
             $stmtImageInsert->bindParam(2, $name, PDO::PARAM_STR);
@@ -48,7 +49,7 @@ if (isset($_POST["update"])) {
     $id = $_POST["id"];
 
     $sqlUpdate = "UPDATE posts SET title = ?, summary = ?, content = ?, date = ? WHERE posts_id = ?";
-    $stmtUpdate = $pdo->prepare($sqlUpdate);
+    $stmtUpdate = $db->prepare($sqlUpdate);
 
     try {
         $stmtUpdate->execute([$title, $summary, $content, $date, $id]);
