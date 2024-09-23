@@ -24,7 +24,7 @@ if ($moduleName) {
             foreach ($data as $row) {
                 echo "<div>";
                 echo "ID: " . $row['id'] . "<br>";
-                echo "Name: " . htmlspecialchars($row['moduleName']);
+                echo "Name: " . htmlspecialchars($row['module_name']);
                 echo "</div><br>";
             }
         } else {

@@ -27,7 +27,7 @@ if (isset($_POST['add_component']) && isset($_POST['component_id']) && isset($_G
           <tbody>
             <tr>
               <th scope='row'>  " . $fetchComponent['id'] . " </th>
-              <td>  " . $fetchComponent['name'] . " </td>
+              <td>  " . $fetchComponent['component_name'] . " </td>
               <td>  " . $currentModule . " </td>
             </tr>
             <tr>
