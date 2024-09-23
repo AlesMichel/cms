@@ -30,15 +30,7 @@ class module
             $queryCheck->execute();
 
             $result = $queryCheck->fetch(PDO::FETCH_ASSOC);
-//            while ($result) {
-//                if ($result['moduleName'] == $this->name) {
-//                    //module name already exists in modules
-//                    $moduleNameAlreadyExists = true;
-//                    echo "Module already exists.";
-//                    break;
-//
-//                }
-//            }
+
             if ($result) {
                 echo "Module already exists.";
                 return false;
@@ -104,6 +96,10 @@ class module
 
     public static function deleteModule($moduleName, PDO $db): bool
     {
+        //first delete values in module_components
+
+
+
 
         //deletes module table based on modules->moduleTableName
         //find module table name
@@ -139,6 +135,20 @@ class module
         return true;
     }
 
+    public static function getModuleNameById(int $id, $db){
+        $getName = '';
+        try{
+            $sql = "SELECT moduleName FROM `modules` WHERE id= :id  ";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            $getName = $stmt->fetch(PDO::FETCH_ASSOC);
+        }catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+        return $getName;
+    }
+
+    //maybe rename to findModuleTableByName
     public static function findModuleByName(string $moduleName, PDO $db)
     {
 
@@ -166,6 +176,48 @@ class module
             echo "Error: " . $e->getMessage();
         }
         return false;
+    }
+
+    public static function getModuleData(int $moduleId, PDO $db) {
+        try {
+            // Step 1: Fetch all component instances that match the given module ID
+            $sql = "SELECT * FROM module_components
+                WHERE module_id = :moduleId
+                ORDER BY component_instance ASC";
+
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':moduleId', $moduleId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Step 2: Fetch the data and organize it by component instance
+            $moduleComponents = [];
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $id = $row['id'];
+                $instance = $row['component_instance'];
+                $componentId = $row['component_id'];
+                $componentData = $row['component_data'];
+
+                // Store the component data, indexed by the instance number
+                if (!isset($moduleComponents[$instance])) {
+                    $moduleComponents[$instance] = [];
+                }
+
+                // Add the component data for this instance
+                $moduleComponents[$instance][] = [
+                    'id' => $id,
+                    'component_id' => $componentId,
+                    'component_data' => $componentData
+                ];
+            }
+
+            // Return the organized data
+            return $moduleComponents;
+
+        } catch (PDOException $e) {
+            echo "Error fetching module data: " . $e->getMessage();
+            return null;
+        }
     }
 
 }

@@ -38,7 +38,15 @@ if(isset($_POST['create'])){
     } else {
         echo "Module ID not found.";
     }
+}
 
+if(isset($_POST['update'])){
+    $moduleName = $_POST['module_id'];
+    $componentId = $_POST['component_id'];
+    $componentInstance = $_POST['component_instance'];
+    $componentData = $_POST['component_data'];
+
+    echo $componentData;
 
 
 }

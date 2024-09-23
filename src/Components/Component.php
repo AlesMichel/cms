@@ -34,5 +34,14 @@ abstract class Component
         return '';
     }
 
+    //get id of module_components
+
+    public static function getIdModuleComponents($moduleId, $instance){
+
+    }
+
+    public static function editComponentData($moduleId, $componentId, $instance, $newData){
+
+    }
 
 }

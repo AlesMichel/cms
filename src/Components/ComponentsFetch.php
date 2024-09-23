@@ -49,7 +49,8 @@ class ComponentsFetch {
 
         return $out;
     }
-    public static function createComponent($db, $currentModule) {
+    public static function createComponent($db, $currentModule): string
+    {
 
         $data = self::fetchAllComponents($db);
         if ($data === null) {
@@ -82,6 +83,20 @@ class ComponentsFetch {
 
 
         return $out;
+    }
+    public static function editComponentData($getCurrentComponent, $moduleId ,$newData, $db){
+
+
+
+
+        //connect to db
+        //first get module id
+        //then get the column we want to update its data
+        //then update with new data
+
+
+
+
     }
 
 }

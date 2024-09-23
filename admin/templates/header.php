@@ -19,7 +19,7 @@ if(!isset($_SESSION["user"])){
 
 
 <body>
-<div class="dashboard d-flex justify-content-between">
+<div class="dashboard d-flex">
     <div class="sidebar bg-dark vh-100">
         <h1 class="bg-primary p-4"><a href="./index.php" class="text-light text-decoration-none">Administrace</a></h1>
         <div class="menu-list p-4 mt-5">
