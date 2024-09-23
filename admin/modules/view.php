@@ -2,14 +2,13 @@
 //connect to db
 include("../../src/DbConnect/connect.php");
 include "../../src/Module/module.php";
-
 include("../templates/header.php");
+
 
 $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 $moduleName = $_GET["name"];
 $getTable = \phpCms\Module\module::findModuleByName($moduleName, $db);
 if ($moduleName) {
-
     //get module id by its name
     $moduleId = \phpCms\Module\module::getModuleId($moduleName, $db);
     // Fetch module component data using the static method
@@ -25,11 +24,9 @@ if ($moduleName) {
         echo "<table class='table table-bordered'>";
         echo "<thead>
         <tr>
-            <th>ID in module_components</th>
-            <th>Component Instance</th>
-            <th>Component ID</th>
-            <th>Component Data</th>
-            <th>Actions</th>
+            <th>Nazev komponenty</th>
+            <th>Hodnota komponenty</th>
+            <th>Akce</th>
         </tr>
       </thead>";
         echo "<tbody>";
@@ -38,9 +35,7 @@ if ($moduleName) {
         foreach ($moduleComponents as $instance => $components) {
             foreach ($components as $component) {
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($component['id']) . "</td>";
-                echo "<td>" . htmlspecialchars($instance) . "</td>";
-                echo "<td>" . htmlspecialchars($component['component_id']) . "</td>";
+                echo "<td>" . htmlspecialchars($component['component_name']) . "</td>";
                 echo "<td>" . htmlspecialchars($component['component_data']) . "</td>";
 
                 // Form and button inside a table cell
@@ -51,7 +46,7 @@ if ($moduleName) {
                 echo "<input type='hidden' name='component_id' value='" . htmlspecialchars($component['component_id']) . "'>";
                 echo "<input type='hidden' name='instance' value='" . htmlspecialchars($instance) . "'>";
                 echo "<input type='hidden' name='component_data' value='" . htmlspecialchars($component['component_data']) . "'>";
-                echo "<button class='btn btn-primary btn-sm' type='submit'>Edit Data</button>";
+                echo "<button class='btn btn-primary btn-sm' type='submit'>Upravit</button>";
                 echo "</form>";
                 echo "</td>";
 

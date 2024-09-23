@@ -34,7 +34,7 @@ class ComponentsFetch {
         // Loop through each component and create an option element
         foreach ($data as $component) {
             $out .= '<option value="' . htmlspecialchars($component['id']) . '">' .
-                htmlspecialchars($component['name']) .
+                htmlspecialchars($component['component_name']) .
                 '</option>';
         }
 
@@ -69,7 +69,7 @@ class ComponentsFetch {
         // Loop through each component and create an option element
         foreach ($data as $component) {
             $out .= '<option value="' . htmlspecialchars($component['id']) . '">' .
-                htmlspecialchars($component['name']) .
+                htmlspecialchars($component['component_name']) .
                 '</option>';
         }
 

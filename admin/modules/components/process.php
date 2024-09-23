@@ -21,15 +21,16 @@ if(isset($_POST['create'])){
 
     if ($moduleId) {
         try {
-            $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data) 
-                    VALUES (:module_id, :component_id, :instance_id, :component_data)";
+            $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data, component_name) 
+                    VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
 
             $stmt = $db->prepare($sql);
             $stmt->execute([
                 ':module_id' => $moduleId,
                 ':component_id' => $componentId,
                 ':instance_id' => 1,
-                ':component_data' => $componentData
+                ':component_data' => $componentData,
+                ':component_name' => $componentName
             ]);
             echo "Component added successfully.";
         } catch (PDOException $e) {
@@ -41,12 +42,12 @@ if(isset($_POST['create'])){
 }
 
 if(isset($_POST['update'])){
-    $moduleName = $_POST['module_id'];
+    $id = $_POST['id'];
+    $moduleId = $_POST['module_id'];
     $componentId = $_POST['component_id'];
     $componentInstance = $_POST['component_instance'];
     $componentData = $_POST['component_data'];
-
-    echo $componentData;
+    Component::editComponentData($id,$moduleId, $componentId, $componentInstance, $componentData, $db);
 
 
 }

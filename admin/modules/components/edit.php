@@ -35,7 +35,8 @@ $data = $_GET['component_data']
         <input type="text" class="form-control" id="component_data" name="component_data" value="<?php echo htmlspecialchars($data); ?>">
     </div>
 
-    <input type="hidden" name="component_id" value="<?php echo htmlspecialchars($id); ?>">
+    <input type="hidden" name="component_id" value="<?php echo htmlspecialchars($componentId); ?>">
+    <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
     <button name="update" type="submit" class="btn btn-primary">Update</button>
 </form>

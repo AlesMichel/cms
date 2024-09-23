@@ -9,17 +9,24 @@ include("../../src/DbConnect/connect.php");
 $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 
 if(isset($_POST["create"])) {
-    $moduleName = $_POST["moduleName"];
-    $tableName = $_POST["tableName"];
+
+    $moduleName = trim($_POST["moduleName"]);
+    $tableName = trim($_POST["tableName"]);
 
     $newModule = new module($moduleName, $tableName);
+
     $moduleNameInsert = $newModule->addModuleToModules();
     $moduleTableInsert = $newModule->addModuleToDB();
-    echo $moduleTableInsert . $moduleNameInsert;
+
     if($moduleTableInsert && $moduleNameInsert) {
-        header("location: ../modules/index.php");
-        echo "module created";
+        $SESSION['message'] = "Module created successfully";
+    }else{
+        $SESSION['error'] = "Error creating module";
+
     }
+    header("location: ../modules/index.php");
+    exit();
+
 }
 if(isset($_POST["delete"])){
     echo $_POST["moduleName"] . "</br>";

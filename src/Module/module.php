@@ -25,7 +25,7 @@ class module
     {
         $moduleNameAlreadyExists = false;
         try {
-            $queryCheck = $this->db->prepare("SELECT * FROM `modules` WHERE `moduleName` = :name");
+            $queryCheck = $this->db->prepare("SELECT * FROM `modules` WHERE `module_name` = :name");
             $queryCheck->bindParam(":name", $this->name);
             $queryCheck->execute();
 
@@ -37,7 +37,7 @@ class module
             }
             //module name does not exit so we proceed to inserting module name into database
 
-            $sql = "INSERT INTO `modules` (moduleName, moduleTableName) VALUES (:moduleName, :moduleTableName)";
+            $sql = "INSERT INTO `modules` (module_name, module_table) VALUES (:moduleName, :moduleTableName)";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':moduleName' => $this->name, ':moduleTableName' => $this->tableName]);
 
@@ -78,7 +78,7 @@ class module
     public static function getModuleId($moduleName, $db){
         $id = null;
         try{
-            $sql = "SELECT id FROM `modules` WHERE moduleName = :moduleName";
+            $sql = "SELECT id FROM `modules` WHERE module_name = :moduleName";
             $stmt = $db->prepare($sql);
             $stmt->execute([':moduleName' => $moduleName]);
 
@@ -110,7 +110,7 @@ class module
             //now we can delete the entry in modules table
 
             try {
-                $sql = "DELETE FROM `modules` WHERE moduleName = :moduleName";
+                $sql = "DELETE FROM `modules` WHERE module_name = :moduleName";
                 $stmt = $db->prepare($sql);
                 $stmt->execute([':moduleName' => $moduleName]);
             } catch (PDOException $e) {
@@ -138,7 +138,7 @@ class module
     public static function getModuleNameById(int $id, $db){
         $getName = '';
         try{
-            $sql = "SELECT moduleName FROM `modules` WHERE id= :id  ";
+            $sql = "SELECT module_name FROM `modules` WHERE id= :id  ";
             $stmt = $db->prepare($sql);
             $stmt->execute([':id' => $id]);
             $getName = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -154,13 +154,13 @@ class module
 
         try {
             //find module table name from table modules
-            $sql = "SELECT moduleTableName FROM `modules` WHERE moduleName = :moduleName";
+            $sql = "SELECT module_table FROM `modules` WHERE module_name = :moduleName";
             $stmt = $db->prepare($sql);
             $stmt->execute([':moduleName' => $moduleName]);
             $moduleTableName = '';
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($result) {
-                $moduleTableName = $result['moduleTableName'];
+                $moduleTableName = $result['module_table'];
             } else {
                 echo "findModuleByName::Name of module table not found";
             }
