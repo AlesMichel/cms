@@ -2,6 +2,11 @@
 
 namespace phpCms\Components;
 //common components class
+
+
+use PDO;
+use PDOException;
+
 abstract class Component
 {
     protected $name;
@@ -13,6 +18,21 @@ abstract class Component
 
     }
     abstract public function render();
+
+    public static function getComponentById($id, $db){
+        try{
+            $sql = "SELECT * FROM components WHERE id = :id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(["id" => $id]);
+            $fetchComponent = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($fetchComponent){
+                return $fetchComponent;
+            }
+        }catch (PDOException $e) {
+            echo "Component not found, Error: " . $e->getMessage();
+        }
+        return '';
+    }
 
 
 }

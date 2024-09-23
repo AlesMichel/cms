@@ -83,25 +83,30 @@ class module
         return true;
     }
 
+    public static function getModuleId($moduleName, $db){
+        $id = null;
+        try{
+            $sql = "SELECT id FROM `modules` WHERE moduleName = :moduleName";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':moduleName' => $moduleName]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($result){
+                $id = $result['id'];
+            }
+            return $id;
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            echo "Module ID not found.";
+        }
+        return $id;
+    }
+
     public static function deleteModule($moduleName, PDO $db): bool
     {
 
         //deletes module table based on modules->moduleTableName
-
-        //first we try to find the moduleTableName
-//        try {
-//            $sql = "SELECT moduleTableName FROM `modules` WHERE moduleName = :moduleName";
-//            $stmt = $db->prepare($sql);
-//            $stmt->execute([':moduleName' => $moduleName]);
-//            $moduleTableName = '';
-//            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-//            if ($result) {
-//                $moduleTableName = $result['moduleTableName'];
-//
-//            } else {
-//                echo "Module table not found";
-//            }
-//            find module table name
+        //find module table name
         $moduleTableName = self::findModuleByName($moduleName, $db);
 
         if ($moduleTableName != '') {
