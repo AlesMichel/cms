@@ -63,8 +63,12 @@ class module
                 return false;
             } else {
                 //table does not exist, proceed to creating new table
+                //create id, columns for components
                 $sql = "CREATE TABLE IF NOT EXISTS `$this->tableName` (
-                id INT(11) AUTO_INCREMENT PRIMARY KEY)";
+                        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+                        component_id INT(11),
+                        component_name VARCHAR(255)
+                )";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute();
             }
@@ -97,9 +101,6 @@ class module
     public static function deleteModule($moduleName, PDO $db): bool
     {
         //first delete values in module_components
-
-
-
 
         //deletes module table based on modules->moduleTableName
         //find module table name
@@ -178,7 +179,30 @@ class module
         return false;
     }
 
-    public static function getModuleData(int $moduleId, PDO $db) {
+    public static function getModuleComponents(int $moduleId, PDO $db){
+        // Step 1: Fetch all components that match module ID
+        try{
+
+            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':moduleId' => $moduleId]);
+            $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($moduleComponents)) {
+                var_dump($moduleComponents);
+            }else{
+                return "This module has no components";
+            }
+
+
+        }catch (PDOException $e) {
+            echo "Error fetching module data: " . $e->getMessage();
+            return null;
+        }
+    }
+
+    public static function getModuleData(int $moduleId, PDO $db): ?array
+    {
         try {
             // Step 1: Fetch all component instances that match the given module ID
             $sql = "SELECT * FROM module_components
@@ -197,6 +221,7 @@ class module
                 $instance = $row['component_instance'];
                 $componentId = $row['component_id'];
                 $componentData = $row['component_data'];
+                $componentName = $row['component_name'];
 
                 // Store the component data, indexed by the instance number
                 if (!isset($moduleComponents[$instance])) {
@@ -207,7 +232,8 @@ class module
                 $moduleComponents[$instance][] = [
                     'id' => $id,
                     'component_id' => $componentId,
-                    'component_data' => $componentData
+                    'component_data' => $componentData,
+                    'component_name' => $componentName
                 ];
             }
 

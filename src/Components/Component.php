@@ -1,11 +1,5 @@
 <?php
 
-namespace phpCms\Components;
-//common components class
-
-
-use PDO;
-use PDOException;
 
 abstract class Component
 {
@@ -59,5 +53,7 @@ abstract class Component
             echo "Data not updated: " . $e->getMessage();
         }
     }
+
+
 
 }

@@ -1,40 +1,33 @@
 <?php
 
-include("../templates/header.php");
+include("../templates/cmsDefaultPage.class.php");
 include('../../src/DbConnect/connect.php');
 $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 
-// Display success message if available
-if (isset($_SESSION['message'])) {
-    echo "<div class='alert alert-success'>" . htmlspecialchars($_SESSION['message']) . "</div>";
-    unset($_SESSION['message']); // Clear the message after displaying
-}
 
-// Display error message if available
-if (isset($_SESSION['error'])) {
-    echo "<div class='alert alert-danger'>" . htmlspecialchars($_SESSION['error']) . "</div>";
-    unset($_SESSION['error']); // Clear the error message after displaying
-}
-
+$out = '';
 $sqlSelect = "SELECT * FROM modules";
 $stmtSelect = $db->query($sqlSelect);
-?>
 
 
 
-<table class="table tabled-bordered">
-    <tbody>
-
-
-<?php
+$out .= '<table class="table tabled-bordered">
+            <thead>
+                <tr class="fw-bold">
+                    <td>Název modulu</td>
+                    <td>Název tabulky</td>
+                    <td>Akce</td>
+                </tr>
+            </thead>
+        <tbody>';
 while($data = $stmtSelect->fetch(PDO::FETCH_ASSOC)){
 
-    echo "<tr>
+    $out .= "<tr>
             <td>" . $data['module_name'] . "</td>
             <td>" . $data['module_table'] . "</td>
             <td>
-                <a class='btn btn-primary' href='view.php?name=" . $data['module_name'] . "'>View</a>
-                <a class='btn btn-info' href='edit.php?name=" . $data['module_name'] . "'>Edit</a>
+                <a class='btn btn-primary' href='viewData.php?name=" . $data['module_name'] . "'>View</a>
+           
                 <a class='btn btn-danger' href='delete.php?name=" . $data['module_name'] . "'>Delete</a>
             </td>
             
@@ -44,15 +37,14 @@ while($data = $stmtSelect->fetch(PDO::FETCH_ASSOC)){
 
 
 
-?>
 
-    </tbody>
-</table>
 
+   $out .= '</tbody></table>';
 
 
 
-<?php
-include("../templates/footer.php");
-?>
+$buildPage = new cmsDefaultPage($out);
+$buildPage->buildLayout();
+
+
 

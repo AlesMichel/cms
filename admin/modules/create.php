@@ -1,28 +1,24 @@
 <?php
-include("../templates/header.php");
-?>
+include("../../src/DbConnect/connect.php");
+include "../../src/Module/module.php";
+include("../templates/cmsDefaultPage.class.php");
 
-<div class="create-form w-100 mx-auto p-4" style="max-width: 700px;">
+$out = '<div class="create-form w-100 mx-auto p-4" style="max-width: 700px;">
     <form action="process.php" method="post" enctype="multipart/form-data">
         <div class="form-field">
-            <label for="moduleName">Module name</label>
-            <input class="form-control" placeholder="Enter module name" type="text" name="moduleName" id="moduleName">
-
-            <input class="form-control" placeholder="Enter table name" type="text" name="tableName" id="tableName">
-
-
-
-            <div class="form-field mb-4">
-                <input class="btn btn-primary" type="submit" value="Submit" name="create">
+            
+            <h5>Nový modul</h5>
+                <input class="form-control" placeholder="Název modulu" type="text" name="moduleName" id="moduleName" required>
+                <input class="form-control" placeholder="Název modulové tabulky" type="text" name="tableName" id="tableName" required>
+            <div class="form-field mt-4">
+                <input class="btn btn-primary" type="submit" value="Vytvořit" name="create">
             </div>
 
         </div>
     </form>
-</div>
+</div>';
 
 
 
-
-<?php
-include("../templates/footer.php");
-?>
+$buildPage = new cmsDefaultPage($out);
+$buildPage->buildLayout();

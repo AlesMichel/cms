@@ -5,12 +5,27 @@ use phpCms\Module\module;
 use phpCms\Components\Component;
 use phpCms\DbConnect\connect;
 
-// Retrieve GET values
-$componentId = $_GET['component_id'];
-$moduleId = $_GET['module_id'];
-$id = $_GET['id'];
-$instance = $_GET['instance'];
-$data = $_GET['component_data']
+//// Retrieve GET values
+//$componentId = $_GET['component_id'];
+//$moduleId = $_GET['module_id'];
+//$id = $_GET['id'];
+//$instance = $_GET['instance'];
+//$data = $_GET['component_data']
+
+
+//if(isset($_SESSION['component_pass_data'])){
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    $componentData = $_SESSION['component_pass_data'];
+
+    $id = $componentData['id'];
+    $moduleId = $componentData['module_id'];
+    $componentId = $componentData['component_id'];
+    $componentName = $componentData['component_name'];
+    $componentInstance = $componentData['instance'];
+    $componentData = $componentData['component_data'];
+
 
 ?>
 
@@ -27,12 +42,12 @@ $data = $_GET['component_data']
 
     <div class="mb-3">
         <label for="component_instance" class="form-label">Component Instance</label>
-        <input type="text" class="form-control" id="component_instance" name="component_instance" value="<?php echo htmlspecialchars($instance); ?>" readonly>
+        <input type="text" class="form-control" id="component_instance" name="component_instance" value="<?php echo htmlspecialchars($componentInstance); ?>" readonly>
     </div>
 
     <div class="mb-3">
-        <label for="component_data" class="form-label">Data</label>
-        <input type="text" class="form-control" id="component_data" name="component_data" value="<?php echo htmlspecialchars($data); ?>">
+        <label for="component_data_update" class="form-label">Data</label>
+        <input type="text" class="form-control" id="component_data_update" name="component_data_update" value="<?php echo htmlspecialchars($componentData); ?>">
     </div>
 
     <input type="hidden" name="component_id" value="<?php echo htmlspecialchars($componentId); ?>">
@@ -40,3 +55,8 @@ $data = $_GET['component_data']
 
     <button name="update" type="submit" class="btn btn-primary">Update</button>
 </form>
+
+<?php
+}else{
+    echo "No components in current module";
+}

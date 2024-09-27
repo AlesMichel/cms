@@ -1,8 +1,7 @@
 <?php
-namespace phpCms\Components;
 
-use PDO;
-use PDOException;
+include("TextField.php");
+
 
 class ComponentsFetch {
 
@@ -19,84 +18,88 @@ class ComponentsFetch {
         return $fetchAllComponents;
     }
 
-    public static function renderComponents($db, $currentModule): string {
+    //renders select box with all components available
+    public static function renderComponents($db): string {
         // Fetch all components from the database
         $data = self::fetchAllComponents($db);
         if ($data === null) {
-            return '<p>No components found.</p>'; // Handle the case where no data is returned
+            return '<p>No components found.</p>';
         }
-
         $out = '';
-
-        $out .= '<label for="component">Choose a component:</label>
-                 <select name="component_id" id="component">';
-
+        $out .= '<label for="component">Komponenta</label>
+                 <select class="form-select" name="component_id" id="createComponentSelect" onchange="handleDynamicForm()">';
         // Loop through each component and create an option element
+        $out .= '<option selected>-</option>';
         foreach ($data as $component) {
             $out .= '<option value="' . htmlspecialchars($component['id']) . '">' .
                 htmlspecialchars($component['component_name']) .
                 '</option>';
         }
-
-        // Close the select box
         $out .= '</select>';
-
-
-
-
-
-
-
+        $out .= '<div id="dynamic-fields"></div>';
         return $out;
     }
-    public static function createComponent($db, $currentModule): string
+
+    public static function createComponent($componentId, $currentModule): string
     {
-
-        $data = self::fetchAllComponents($db);
-        if ($data === null) {
-            return '<p>No components found.</p>'; // Handle the case where no data is returned
-        }
-
+        //new out
         $out = '';
 
-        $out = '<form method="POST" action="components/create.php?current_module=' . urlencode($currentModule) . '">';
 
-        // Redirects to add_component.php
-        // Start the HTML for the select box
-        $out .= '<label for="component">Choose a component:</label>
-                 <select name="component_id" id="component">';
+        //build field
+        if($componentId === null) {
+            echo "No component found";
+        }elseif($componentId == 1) {
+            $out .= TextField::getFields();
 
-        // Loop through each component and create an option element
-        foreach ($data as $component) {
-            $out .= '<option value="' . htmlspecialchars($component['id']) . '">' .
-                htmlspecialchars($component['component_name']) .
-                '</option>';
+        }elseif($componentId == 2) {
+            $out .= 'Image';
+        } elseif($componentId == 3) {
+            $out .= 'Position';
         }
 
-        // Close the select box
-        $out .= '</select>';
-
-        $out .= '</select>
-                 <button type="submit" name="add_component">Add Component</button>';
-
-        $out .= '<form/>';
 
 
         return $out;
     }
     public static function editComponentData($getCurrentComponent, $moduleId ,$newData, $db){
 
-
-
-
         //connect to db
         //first get module id
         //then get the column we want to update its data
         //then update with new data
 
+    }
 
+    public static function findComponentTypeById($db, $componentId){
+        try{
+            $sql = 'SELECT * FROM components WHERE id = :component_id';
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':component_id', $componentId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $componentType = $row['component_type'];
+            if(!empty($componentType)){
+                if($componentType == 'text'){
+                    echo $componentType;
+                }
 
+                return $componentType;
+            }else{
+                echo "Component not found";
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    }
+
+    public static function createNewComponent($componentId, $currentModule, $db){
+       $componentType = self::findComponentTypeById($db, $currentModule);
+       if($componentType == 'text'){
+         return TextField::getFields();
+       }
 
     }
 
+    public static function insertNewComponent($db, $currentModule, $componentType){}
 }

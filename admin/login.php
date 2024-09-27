@@ -5,7 +5,7 @@ if(isset($_POST['login'])){
     if($username == "admin" && $password == "pass"){
         session_start();
         $_SESSION["user"] = "admin";
-        header("Location:index.php");
+        header("Location:modules/index.php");
     }
 
 }
