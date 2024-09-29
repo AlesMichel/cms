@@ -26,9 +26,9 @@ while($data = $stmtSelect->fetch(PDO::FETCH_ASSOC)){
             <td>" . $data['module_name'] . "</td>
             <td>" . $data['module_table'] . "</td>
             <td>
-                <a class='btn btn-primary' href='viewData.php?name=" . $data['module_name'] . "'>View</a>
-           
-                <a class='btn btn-danger' href='delete.php?name=" . $data['module_name'] . "'>Delete</a>
+                <form method='post' action=''>
+                <a class='btn btn-primary' href='viewData.php?module_name=" . $data['module_name'] . "'>View</a>
+                </form>
             </td>
             
         </tr>";

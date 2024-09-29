@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 include("../../../src/Module/Module.php");
 include("../../../src/Components/ComponentsFetch.php");
 include("../../../src/DbConnect/connect.php");
@@ -10,57 +11,126 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //determine if i am creating, updating or deleting
     $action = $_POST["action"] ?? null;
 
+    if ($action == "create") {
+        $moduleId = $_SESSION["current_module_id"] ?? null;
+        $componentData = $_POST["component_data"] ?? '';
 
-    $moduleId = $_SESSION["current_module_id"] ?? null;
-    $componentName = $_POST["component_name"];
-    $componentId = $_SESSION["component_id"];
-    $componentData = $_POST["component_data"] ?? '';
-    if ($moduleId) {
-        
-        if ($action == "create") {
-            try {
-                $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data, component_name) 
+        if ($moduleId) {
+            $componentName = $_POST["component_name"];
+            $componentId = $_SESSION["component_id"];
+
+            //create a match instance => create fields for all instances
+            $lastInstance = component::getLastInstance($moduleId, $db);
+            echo $lastInstance;
+            //sql for batch
+            $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data, component_name) 
                     VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
 
-                $stmt = $db->prepare($sql);
-                $stmt->execute([
-                    ':module_id' => $moduleId,
-                    ':component_id' => $componentId,
-                    ':instance_id' => 1,
-                    ':component_data' => $componentData,
-                    ':component_name' => $componentName
-                ]);
-                header("Location: ../../modules/index.php");
-            } catch (PDOException $e) {
-                echo "Error: " . $e->getMessage();
+            if($lastInstance){
+                for ($i = 1; $i <= $lastInstance; $i++) {
+                //batch sql until i match instance
+                try {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute([
+                        ':module_id' => $moduleId,
+                        ':component_id' => $componentId,
+                        ':instance_id' => $i,
+                        ':component_data' => $componentData,
+                        ':component_name' => $componentName
+                    ]);
+                }catch(PDOException $e){
+                    echo "Error: " . $e->getMessage();
+                }
+            }
 
             }
+
+            header("Location: ../../modules/index.php");
+
+            }
+
+
+
+
+
+    //deleting
+    } else if ($action == "delete") {
+        $componentPassData = $_SESSION['component_pass_data'];
+        $componentId = $componentPassData['component_id'];
+        $componentName = $componentPassData['component_name'];
+        $moduleId = $componentPassData["module_id"];
+        try {
+            $sql = "DELETE FROM module_components
+                WHERE module_id = :module_id
+                  AND component_id = :component_id
+                  AND component_name = :component_name";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute([
+                ':module_id' => $moduleId,
+                ':component_id' => $componentId,
+                ':component_name' => $componentName
+            ]);
+
+            header("Location: ../../modules/index.php");
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
         }
 
+    //inserting data
+    } else if ($action == "insertData") {
+        // Ensure the session data is available
+        if (isset($_SESSION['component_pass_data'])) {
+            $instance = $_SESSION['newInstance'];
+            $moduleId = $_SESSION['current_module_id'];
+            $componentPassArray = $_SESSION['component_pass_data_insert'];
+
+            // Check if the componentPassArray is an array
+            if (is_array($componentPassArray)) {
+                try {
+                    // Loop through each component in the pass array
+                    foreach ($componentPassArray as $component) {
+                        // Check if each component is an array
+                        if (is_array($component)) {
+                            // Access the component ID and name
+                            $componentId = $component[0]; // First element: component ID
+                            $componentName = $component[1]; // Second element: component Name
+                            $componentData = $_POST['component_' . $componentName] ?? null; // get value of field
+//                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
+//                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
+//                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
+
+
+                            //now we got all field data and we are ready to insert them
+                            try {
+                                $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data, component_name) 
+                    VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
+
+                                $stmt = $db->prepare($sql);
+                                $stmt->execute([
+                                    ':module_id' => $moduleId,
+                                    ':component_id' => $componentId,
+                                    ':instance_id' => $instance,
+                                    ':component_data' => $componentData,
+                                    ':component_name' => $componentName
+                                ]);
+                                header("Location: ../../modules/index.php");
+                            } catch (PDOException $e) {
+                                echo "Error: " . $e->getMessage();
+                            }
+                        } else {
+                            echo "Expected an array for a component but got: " . htmlspecialchars($component) . "<br>";
+                        }
+                    }
+                } catch (PDOException $e) {
+                    echo "Error: " . $e->getMessage();
+                }
+            } else {
+                echo "No component pass data available.";
+            }
+        } else {
+            echo "No component pass data available.";
+        }
     }
+
 }
-
-
-
-
-
-
-
-
-
-//if(isset($_POST['update'])){
-//
-//
-//    $id = $_POST['id'];
-//    $moduleId = $_POST['module_id'];
-//    $componentId = $_POST['component_id'];
-//    $componentInstance = $_POST['component_instance'];
-//    $componentDataUpdate = $_POST['component_data_update'];
-//
-//
-//    echo $id . " " . $moduleId . " " . $componentId . " " . $componentInstance . " " . $componentDataUpdate . '  ';
-//
-//    Component::editComponentData($id,$moduleId, $componentId, $componentInstance, $componentDataUpdate, $db);
-//
-//
-//}

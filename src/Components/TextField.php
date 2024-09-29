@@ -19,4 +19,9 @@ class TextField extends Component
         <label class='mt-3' for='textField' class='form-label'>Název komponenty</label>
         <input class='form-control' type='text' id='textField' name='component_name' placeholder='...' required/>";
     }
+    public static function getDataFields($componentId ,$componentName): string{
+        return "
+        <label for='textField_" .$componentId. "' class='form-label'>" . $componentName ."</label>
+        <input class='form-control' type='text' id='textField" . $componentId ."' name='component_" . $componentName ."' placeholder='...' required/>";
+    }
 }

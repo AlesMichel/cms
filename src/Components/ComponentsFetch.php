@@ -2,7 +2,6 @@
 
 include("TextField.php");
 
-
 class ComponentsFetch {
 
     public static function fetchAllComponents($db) {
@@ -58,8 +57,6 @@ class ComponentsFetch {
             $out .= 'Position';
         }
 
-
-
         return $out;
     }
     public static function editComponentData($getCurrentComponent, $moduleId ,$newData, $db){
@@ -70,23 +67,35 @@ class ComponentsFetch {
         //then update with new data
 
     }
+    public static function printComponentTable($componentId, $componentName, $db):string{
+        $componentType = self::findComponentTypeById($componentId, $db);
+        return '<table class="table table-bordered">
+                <tr>
+                    <td>Název komponenty</td>
+                    <td>'. $componentName .'</td>
+                </tr>
+                
+                <tr>
+                    <td>Typ komponenty</td>
+                    <td>'. $componentType .'</td>
+                </tr>
 
-    public static function findComponentTypeById($db, $componentId){
+            </table>';
+    }
+
+
+    public static function findComponentTypeById($componentId, $db){
         try{
-            $sql = 'SELECT * FROM components WHERE id = :component_id';
+            $sql = 'SELECT component_type FROM components WHERE id = :component_id';
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':component_id', $componentId);
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $componentType = $row['component_type'];
-            if(!empty($componentType)){
-                if($componentType == 'text'){
-                    echo $componentType;
-                }
-
+            $componentType = $row["component_type"];
+            if($componentType){
                 return $componentType;
             }else{
-                echo "Component not found";
+                return false;
             }
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
@@ -94,12 +103,26 @@ class ComponentsFetch {
     }
 
     public static function createNewComponent($componentId, $currentModule, $db){
-       $componentType = self::findComponentTypeById($db, $currentModule);
+       $componentType = self::findComponentTypeById($componentId, $db);
+       $out = '';
        if($componentType == 'text'){
-         return TextField::getFields();
+         $out .= TextField::getFields();
+       }else{
+           $out .= 'No fields found';
        }
-
+       return $out;
     }
 
-    public static function insertNewComponent($db, $currentModule, $componentType){}
+    public static function insertComponentData($componentId, $componentName, $db): string
+    {
+        $componentType = self::findComponentTypeById($componentId, $db);
+        $out = '';
+        if($componentType == 'text'){
+            $out .= TextField::getDataFields($componentId,$componentName);
+        }else{
+            $out .= 'No data fields found';
+        }
+        return $out;
+    }
+
 }

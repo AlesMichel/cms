@@ -1,10 +1,7 @@
 <?php
 
-namespace phpCms\Module;
 
 
-use PDO;
-use PDOException;
 
 class module
 {
@@ -178,28 +175,68 @@ class module
         }
         return false;
     }
-
     public static function getModuleComponents(int $moduleId, PDO $db){
         // Step 1: Fetch all components that match module ID
         try{
 
-            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId";
+            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId AND component_instance = :component_instance";
             $stmt = $db->prepare($sql);
-            $stmt->execute([':moduleId' => $moduleId]);
+            $stmt->execute([':moduleId' => $moduleId, ':component_instance' => '1']);
             $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($moduleComponents)) {
-                var_dump($moduleComponents);
+                return $moduleComponents;
             }else{
                 return "This module has no components";
             }
-
 
         }catch (PDOException $e) {
             echo "Error fetching module data: " . $e->getMessage();
             return null;
         }
     }
+
+    public static function getComponentsForEditing($moduleId, PDO $db): ?array{
+        try {
+            // Step 1: Fetch all component instances that match the given module ID
+            $sql = "SELECT * FROM module_components
+                WHERE module_id = :moduleId AND component_instance = :component_instance";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':moduleId' => $moduleId, ':component_instance' => '1']);
+
+            // Step 2: Fetch the data and organize it by component instance
+            $moduleComponents = [];
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $id = $row['id'];
+                $instance = $row['component_instance'];
+                $componentId = $row['component_id'];
+                $componentData = $row['component_data'];
+                $componentName = $row['component_name'];
+
+                // Store the component data, indexed by the instance number
+                if (!isset($moduleComponents[$instance])) {
+                    $moduleComponents[$instance] = [];
+                }
+                // Add the component data for this instance
+                $moduleComponents[$instance][] = [
+                    'id' => $id,
+                    'component_id' => $componentId,
+                    'component_data' => $componentData,
+                    'component_name' => $componentName
+                ];
+            }
+
+            // Return the organized data
+            return $moduleComponents;
+
+        } catch (PDOException $e) {
+            echo "Error fetching module data: " . $e->getMessage();
+            return null;
+        }
+    }
+
 
     public static function getModuleData(int $moduleId, PDO $db): ?array
     {

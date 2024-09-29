@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../../vendor/autoload.php';
-use phpCms\Module\module;
+
 
 session_start();
 
 include("../../src/DbConnect/connect.php");
-
+include("../../src/Module/Module.php");
+//remake for session adn action like components/process.php
 $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 
 if(isset($_POST["create"])) {
@@ -31,7 +31,7 @@ if(isset($_POST["create"])) {
 if(isset($_POST["delete"])){
     echo $_POST["moduleName"] . "</br>";
     $moduleName = $_POST["moduleName"];
-    $deleteModule = \phpCms\Module\module::deleteModule($moduleName, $db);
+    $deleteModule = module::deleteModule($moduleName, $db);
     if($deleteModule) {
         echo "module deleted";
         header("location: ../modules/index.php");

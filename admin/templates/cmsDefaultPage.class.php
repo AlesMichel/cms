@@ -86,7 +86,7 @@ class cmsDefaultPage {
         // Loop through the tabs to generate each tab's HTML
         foreach ($tabs as $label => $url) {
             // Append the module name to each URL
-            $fullUrl = ABS_URL . $url . '?name=' . $moduleName;
+            $fullUrl = ABS_URL . $url . '?module_name=' . $moduleName;
 
             // Determine the active class by comparing the current URL
             $activeClass = (strpos($currentUrl, $url) !== false) ? 'active' : '';

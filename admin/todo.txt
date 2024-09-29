@@ -4,13 +4,13 @@
 3. new file for users
 
 4. change all posts/gets for sessions
-5. create new entry button
 5.5 safe deleting
 
-6. fetch changes
+6. fetch changes - done i guess
 7. alerts
-
-
+8. when creating a new component check is there is already a component with the name
+9. when i do a insert of a new component create instance for every max instance for the current module id - done
+10. edit button and delete button for each entry
 session_start();
 if (isset($_SESSION['message'])) {
     echo "<div class='alert alert-success'>" . $_SESSION['message'] . "</div>";
@@ -33,3 +33,9 @@ if (isset($_SESSION['error'])) {
         header("location: ../modules/create.php");
         exit();
     }
+
+
+
+    free hosting
+
+    5QpEr5z9km7uO9

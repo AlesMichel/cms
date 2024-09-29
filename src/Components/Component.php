@@ -1,8 +1,7 @@
 <?php
 
 
-abstract class Component
-{
+abstract class Component{
     protected $name;
     protected $type;
 
@@ -14,6 +13,7 @@ abstract class Component
     }
 
     abstract public function render();
+
 
     public static function getComponentById($id, $db)
     {
@@ -54,6 +54,27 @@ abstract class Component
         }
     }
 
+    public static function getLastInstance(int $moduleId, PDO $db){
+        try {
+            // Using sql max find last instance
+            $sql = "SELECT MAX(component_instance) AS last_instance 
+                FROM module_components 
+                WHERE module_id = :module_id";
 
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Fetch the result
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Return the highest instance or 0 if none is found
+            return $row['last_instance'] ?? 1;
+
+        }catch (PDOException $e) {
+            echo "Error fetching module data: " . $e->getMessage();
+            return null;
+        }
+    }
 
 }

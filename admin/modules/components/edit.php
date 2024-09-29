@@ -1,19 +1,8 @@
 <?php
-include("../../templates/header.php");
-require_once __DIR__ . '/../../../vendor/autoload.php';
-use phpCms\Module\module;
-use phpCms\Components\Component;
-use phpCms\DbConnect\connect;
-
-//// Retrieve GET values
-//$componentId = $_GET['component_id'];
-//$moduleId = $_GET['module_id'];
-//$id = $_GET['id'];
-//$instance = $_GET['instance'];
-//$data = $_GET['component_data']
 
 
-//if(isset($_SESSION['component_pass_data'])){
+
+
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
