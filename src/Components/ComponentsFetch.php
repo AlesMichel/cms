@@ -59,14 +59,6 @@ class ComponentsFetch {
 
         return $out;
     }
-    public static function editComponentData($getCurrentComponent, $moduleId ,$newData, $db){
-
-        //connect to db
-        //first get module id
-        //then get the column we want to update its data
-        //then update with new data
-
-    }
     public static function printComponentTable($componentId, $componentName, $db):string{
         $componentType = self::findComponentTypeById($componentId, $db);
         return '<table class="table table-bordered">
@@ -119,6 +111,18 @@ class ComponentsFetch {
         $out = '';
         if($componentType == 'text'){
             $out .= TextField::getDataFields($componentId,$componentName);
+        }else{
+            $out .= 'No data fields found';
+        }
+        return $out;
+    }
+
+    public static function editComponentData($componentId, $componentName, $componentData, $db): string
+    {
+        $componentType = self::findComponentTypeById($componentId, $db);
+        $out = '';
+        if($componentType == 'text'){
+            $out .= TextField::getDataFieldsForEdit($componentId,$componentName, $componentData);
         }else{
             $out .= 'No data fields found';
         }

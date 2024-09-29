@@ -24,4 +24,9 @@ class TextField extends Component
         <label for='textField_" .$componentId. "' class='form-label'>" . $componentName ."</label>
         <input class='form-control' type='text' id='textField" . $componentId ."' name='component_" . $componentName ."' placeholder='...' required/>";
     }
+    public static function getDataFieldsForEdit($componentId ,$componentName, $componentData): string{
+        return "
+        <label for='textField_".$componentId."' class='form-label'>" . $componentName ."</label>
+        <input class='form-control' type='text' id='textField".$componentId."' value='".$componentData." ' name='component_" . $componentName ."' placeholder='...' required/>";
+    }
 }

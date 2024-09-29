@@ -1,8 +1,5 @@
 <?php
-
-
-
-
+include("../../templates/cmsDefaultPage.class.php");
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -14,38 +11,44 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $componentName = $componentData['component_name'];
     $componentInstance = $componentData['instance'];
     $componentData = $componentData['component_data'];
+    $out = '';
 
 
-?>
+$out .= "<form method='POST' action='process.php'>
+        <div class='mb-3'>
+        <label for='component_id' class='form-label'>Component ID</label>
+        <input type='text' class='form-control' id='component_id' name='component_id' value='$componentId' readonly>
+        </div>
 
-<form method="POST" action="process.php">
-    <div class="mb-3">
-        <label for="component_id" class="form-label">Component ID</label>
-        <input type="text" class="form-control" id="component_id" name="component_id" value="<?php echo htmlspecialchars($componentId); ?>" readonly>
-    </div>
+        <div class='mb-3'>
+        <label for='module_id' class='form-label'>Module ID</label>
+        <input type='text' class='form-control' id='module_id' name='module_id' value='$moduleId' readonly>
+        </div>
 
-    <div class="mb-3">
-        <label for="module_id" class="form-label">Module ID</label>
-        <input type="text" class="form-control" id="module_id" name="module_id" value="<?php echo htmlspecialchars($moduleId); ?>" readonly>
-    </div>
+        <div class='mb-3'>
+        <label for='component_instance' class='form-label'>Component Instance</label>
+        <input type='text' class='form-control' id='component_instance' name='component_instance' value='$componentInstance' readonly>
+        </div>
 
-    <div class="mb-3">
-        <label for="component_instance" class="form-label">Component Instance</label>
-        <input type="text" class="form-control" id="component_instance" name="component_instance" value="<?php echo htmlspecialchars($componentInstance); ?>" readonly>
-    </div>
+        <div class='mb-3'>
+        <label for='component' class='form-label'>Povinné</label>
+        <input type='checkbox' class='form-control' id='component_data_update' name='component_data_update' value='$componentData'>
+        </div>
 
-    <div class="mb-3">
-        <label for="component_data_update" class="form-label">Data</label>
-        <input type="text" class="form-control" id="component_data_update" name="component_data_update" value="<?php echo htmlspecialchars($componentData); ?>">
-    </div>
+        <input type='hidden' name='action' value='editComponent'>
+        <input type='hidden' name='component_id' value='$componentId'>
+        <input type='hidden' name='id' value='".htmlspecialchars($id)."'>
 
-    <input type="hidden" name="component_id" value="<?php echo htmlspecialchars($componentId); ?>">
-    <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+        <button name='update' type='submit' class='btn btn-primary'>Upravit</button>
+        </form>";
 
-    <button name="update" type="submit" class="btn btn-primary">Update</button>
-</form>
+    
+    
 
-<?php
+    $buildPage = new cmsDefaultPage($out);
+    $buildPage->buildLayout();
+    
 }else{
     echo "No components in current module";
 }
+

@@ -20,7 +20,7 @@ if ($moduleName) {
     $_SESSION['current_module_id'] = $moduleId;
 
     $out .= "<form method='POST' action='./components/create.php'>";
-
+    $out .= "<div class=''><h5>Komponenty pro modul: " . htmlspecialchars($moduleName) . " / id: " . htmlspecialchars($moduleId) . "</h5></div>";
     $out .= "<button class='btn btn-primary btn-sm my-3' type='submit'>Přidat komponentu</button>";
     $out .= "</form>";
     // Check if any components are found for this module
@@ -31,19 +31,12 @@ if ($moduleName) {
         $out .= "<p>No components found for this module.</p>";
 
     } else {
-        $out .= "<div class=''><h5>Components for Module ID: " . htmlspecialchars($moduleId) . " /  " . htmlspecialchars($moduleName) . " </h5></div>";
-
-
-
-
-
-
         // view all data
 
         $out .= "<table class='table table-bordered'>";
         $out .= "<thead>
         <tr>
-            <th>Nazev komponenty</th>
+            <th>Název komponenty</th>
             <th>Akce</th>
         </tr>
       </thead>";

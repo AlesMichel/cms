@@ -196,6 +196,27 @@ class module
         }
     }
 
+    public static function getModuleDataForInstance(int $moduleId, int $instance, PDO $db){
+        // Step 1: Fetch all components that match module ID
+        try{
+
+            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId AND component_instance = :component_instance";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':moduleId' => $moduleId, ':component_instance' => $instance]);
+            $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($moduleComponents)) {
+                return $moduleComponents;
+            }else{
+                return "This module has no components";
+            }
+
+        }catch (PDOException $e) {
+            echo "Error fetching module data: " . $e->getMessage();
+            return null;
+        }
+    }
+
     public static function getComponentsForEditing($moduleId, PDO $db): ?array{
         try {
             // Step 1: Fetch all component instances that match the given module ID
@@ -227,7 +248,6 @@ class module
                     'component_name' => $componentName
                 ];
             }
-
             // Return the organized data
             return $moduleComponents;
 
@@ -236,7 +256,6 @@ class module
             return null;
         }
     }
-
 
     public static function getModuleData(int $moduleId, PDO $db): ?array
     {

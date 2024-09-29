@@ -75,7 +75,8 @@ class cmsDefaultPage {
     {
         $tabs = [
             'Záznamy' => '/modules/viewData.php',
-            'Komponenty' => '/modules/viewComponents.php'
+            'Komponenty' => '/modules/viewComponents.php',
+            'Konfigurace modulu' => '/modules/moduleConfig.php'
         ];
         // Get the current URL path (without the domain)
         $currentUrl = $_SERVER['REQUEST_URI'];
