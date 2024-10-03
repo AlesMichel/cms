@@ -18,12 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($moduleId) {
             $componentName = $_POST["component_name"];
             $componentId = $_SESSION["component_id"];
-
+            $getTableName = module::findModuleTableById($moduleId, $db);
             //create a match instance => create fields for all instances
             $lastInstance = component::getLastInstance($moduleId, $db);
             echo $lastInstance;
             //sql for batch
-            $sql = "INSERT INTO module_components (module_id, component_id, component_instance, component_data, component_name) 
+            if($getTableName){
+
+            $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_data, component_name) 
                     VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
 
             if($lastInstance){
@@ -43,8 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
 
-            }
-
+            }}
             header("Location: ../../modules/index.php");
 
             }
@@ -53,8 +54,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $componentId = $componentPassData['component_id'];
         $componentName = $componentPassData['component_name'];
         $moduleId = $componentPassData["module_id"];
+        $getTableName = module::findModuleTableById($moduleId, $db);
         try {
-            $sql = "DELETE FROM module_components
+            $sql = "DELETE FROM $getTableName
                 WHERE module_id = :module_id
                   AND component_id = :component_id
                   AND component_name = :component_name";
@@ -93,11 +95,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
 //                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
 //                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
-
+                            $getTableName = module::findModuleTableById($moduleId, $db);
 
                             //now we got all field data and we are ready to insert them
                             try {
-                                $sql = "INSERT INTO module_components
+                                $sql = "INSERT INTO $getTableName
                                 (module_id, component_id, component_instance, component_data, component_name) 
                                 VALUES
                                 (:module_id, :component_id, :instance_id, :component_data, :component_name)";
@@ -148,7 +150,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Access the component ID and name
                             $componentId = $component[0]; // First element: component ID
                             $componentName = $component[1]; // Second element: component Name
-                            $componentData = $_POST['component_' . $componentName] ?? null; // get value of field
+                            $componentData = $_POST['component_' . $componentName] ?? null;
+                            $getTableName = module::findModuleTableById($moduleId, $db);
+                            // get value of field
 //                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
 //                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
 //                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
@@ -158,7 +162,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             try {
 
 
-                                $sql = "UPDATE module_components 
+                                $sql = "UPDATE $getTableName 
                                 SET component_data = :component_data, 
                                     component_name = :component_name 
                                 WHERE module_id = :module_id 

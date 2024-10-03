@@ -1,0 +1,3 @@
+handleImageUpload = function(files, callback) {
+
+}

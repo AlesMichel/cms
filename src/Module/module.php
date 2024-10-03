@@ -62,10 +62,16 @@ class module
                 //table does not exist, proceed to creating new table
                 //create id, columns for components
                 $sql = "CREATE TABLE IF NOT EXISTS `$this->tableName` (
-                        id INT(11) AUTO_INCREMENT PRIMARY KEY,
-                        component_id INT(11),
-                        component_name VARCHAR(255)
-                )";
+                        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                        module_id INT(11) UNSIGNED,
+                        component_id INT(11) UNSIGNED,
+                        component_instance INT(11),
+                        component_name VARCHAR(255),
+                        component_data BLOB,
+                        FOREIGN KEY (module_id) REFERENCES modules(id) ON
+                            DELETE CASCADE, 
+                        FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE
+                        ) ENGINE=INNODB;";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute();
             }
@@ -145,7 +151,32 @@ class module
         }
         return $getName;
     }
+    public static function findModuleTableById(int $moduleId, $db){
+        try {
+            //find module table name from table modules
+            $sql = "SELECT module_table FROM `modules` WHERE id = :moduleId";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':moduleId' => $moduleId]);
+            $moduleTableName = '';
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $moduleTableName = $result['module_table'];
+            } else {
+                echo "findModuleByName::Name of module table not found";
+            }
+            //find modules table in DB
+            $queryCheck = $db->prepare("SHOW TABLES LIKE :tableName");
+            $queryCheck->execute([':tableName' => $moduleTableName]);
+            $tableExists = $queryCheck->fetch();
+            if ($tableExists) {
+                return $moduleTableName;
+            }
 
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+        return false;
+    }
     //maybe rename to findModuleTableByName
     public static function findModuleByName(string $moduleName, PDO $db)
     {
@@ -177,9 +208,11 @@ class module
     }
     public static function getModuleComponents(int $moduleId, PDO $db){
         // Step 1: Fetch all components that match module ID
+        $getModuleTable = module::findModuleTableById($moduleId, $db);
+        if($getModuleTable){
         try{
 
-            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId AND component_instance = :component_instance";
+            $sql = "SELECT * FROM $getModuleTable WHERE module_id = :moduleId AND component_instance = :component_instance";
             $stmt = $db->prepare($sql);
             $stmt->execute([':moduleId' => $moduleId, ':component_instance' => '1']);
             $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -194,13 +227,19 @@ class module
             echo "Error fetching module data: " . $e->getMessage();
             return null;
         }
+        }else{
+            return "Module table not found";
+        }
     }
 
     public static function getModuleDataForInstance(int $moduleId, int $instance, PDO $db){
+
         // Step 1: Fetch all components that match module ID
+        $moduleTableName = self::findModuleTableById($moduleId, $db);
+        if($moduleTableName){
         try{
 
-            $sql = "SELECT * FROM module_components WHERE module_id = :moduleId AND component_instance = :component_instance";
+            $sql = "SELECT * FROM $moduleTableName WHERE module_id = :moduleId AND component_instance = :component_instance";
             $stmt = $db->prepare($sql);
             $stmt->execute([':moduleId' => $moduleId, ':component_instance' => $instance]);
             $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -215,12 +254,19 @@ class module
             echo "Error fetching module data: " . $e->getMessage();
             return null;
         }
+        }else{
+            return "Module table not found";
+        }
     }
 
-    public static function getComponentsForEditing($moduleId, PDO $db): ?array{
+    public static function getComponentsForEditing($moduleId, PDO $db)
+    {
+        $moduleTableName = self::findModuleTableById($moduleId, $db);
+        if($moduleTableName){
         try {
             // Step 1: Fetch all component instances that match the given module ID
-            $sql = "SELECT * FROM module_components
+
+            $sql = "SELECT * FROM $moduleTableName
                 WHERE module_id = :moduleId AND component_instance = :component_instance";
 
             $stmt = $db->prepare($sql);
@@ -255,13 +301,18 @@ class module
             echo "Error fetching module data: " . $e->getMessage();
             return null;
         }
+    }else{
+            return "Module table not found";
+        }
     }
 
-    public static function getModuleData(int $moduleId, PDO $db): ?array
+    public static function getModuleData(int $moduleId, PDO $db)
     {
+        $moduleTableName = self::findModuleTableById($moduleId, $db);
+        if($moduleTableName){
         try {
             // Step 1: Fetch all component instances that match the given module ID
-            $sql = "SELECT * FROM module_components
+            $sql = "SELECT * FROM $moduleTableName
                 WHERE module_id = :moduleId
                 ORDER BY component_instance ASC";
 
@@ -297,9 +348,13 @@ class module
             return $moduleComponents;
 
         } catch (PDOException $e) {
-            echo "Error fetching module data: " . $e->getMessage();
-            return null;
+            return "Error fetching module data: " . $e->getMessage();
         }
     }
+    else{
+        return "Module table not found";
+
+    }
+}
 
 }

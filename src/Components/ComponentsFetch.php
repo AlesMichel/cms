@@ -1,6 +1,7 @@
 <?php
-
+include("Component.php");
 include("TextField.php");
+include('Image.php');
 
 class ComponentsFetch {
 
@@ -39,11 +40,10 @@ class ComponentsFetch {
         return $out;
     }
 
-    public static function createComponent($componentId, $currentModule): string
+    public static function createComponent($componentId): string
     {
         //new out
         $out = '';
-
 
         //build field
         if($componentId === null) {
@@ -52,7 +52,7 @@ class ComponentsFetch {
             $out .= TextField::getFields();
 
         }elseif($componentId == 2) {
-            $out .= 'Image';
+            $out .= Image::getFields();
         } elseif($componentId == 3) {
             $out .= 'Position';
         }
@@ -99,7 +99,10 @@ class ComponentsFetch {
        $out = '';
        if($componentType == 'text'){
          $out .= TextField::getFields();
-       }else{
+       }elseif($componentType == 'image'){
+           $out .= Image::getFields();
+       }
+       else{
            $out .= 'No fields found';
        }
        return $out;
@@ -111,7 +114,10 @@ class ComponentsFetch {
         $out = '';
         if($componentType == 'text'){
             $out .= TextField::getDataFields($componentId,$componentName);
-        }else{
+        }elseif($componentType == 'image'){
+            $out .= Image::getDataFields($componentId,$componentName);
+        }
+        else{
             $out .= 'No data fields found';
         }
         return $out;
@@ -123,7 +129,10 @@ class ComponentsFetch {
         $out = '';
         if($componentType == 'text'){
             $out .= TextField::getDataFieldsForEdit($componentId,$componentName, $componentData);
-        }else{
+        }elseif ($componentType == 'image'){
+            $out .= Image::getDataFieldsForEdit($componentId,$componentName, $componentData);
+        }
+        else{
             $out .= 'No data fields found';
         }
         return $out;

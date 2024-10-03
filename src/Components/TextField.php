@@ -1,6 +1,6 @@
 <?php
 
-include("Component.php");
+
 
 class TextField extends Component
 {

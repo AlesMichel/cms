@@ -29,15 +29,18 @@ $out .= "<form method='POST' action='process.php'>
         <label for='component_instance' class='form-label'>Component Instance</label>
         <input type='text' class='form-control' id='component_instance' name='component_instance' value='$componentInstance' readonly>
         </div>
-
+        
         <div class='mb-3'>
-        <label for='component' class='form-label'>Povinné</label>
-        <input type='checkbox' class='form-control' id='component_data_update' name='component_data_update' value='$componentData'>
+        <div class='form-check form-switch'>
+        <input name='isRequired' class='form-check-input' type='checkbox' id='flexSwitchCheckChecked' checked>
+        <label class='form-check-label' for='flexSwitchCheckChecked'>Komponenta je povinná</label>
+         </div>
+            
         </div>
 
         <input type='hidden' name='action' value='editComponent'>
         <input type='hidden' name='component_id' value='$componentId'>
-        <input type='hidden' name='id' value='".htmlspecialchars($id)."'>
+        <input type='hidden' name='id' value='" . htmlspecialchars($id) . "'>
 
         <button name='update' type='submit' class='btn btn-primary'>Upravit</button>
         </form>";

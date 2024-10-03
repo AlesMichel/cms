@@ -33,8 +33,9 @@ abstract class Component{
 
     public static function editComponentData($id ,$moduleId, $componentId, $instance, $newData, $db)
     {
+        $getModuleTable = module::findModuleTableById($moduleId, $db);
         try {
-            $sql = "UPDATE module_components 
+            $sql = "UPDATE $getModuleTable
                 SET component_data = :new_data 
                 WHERE id = :id
                   AND module_id = :module_id 
@@ -55,10 +56,11 @@ abstract class Component{
     }
 
     public static function getLastInstance(int $moduleId, PDO $db){
+        $getModuleTable = module::findModuleTableById($moduleId, $db);
         try {
             // Using sql max find last instance
             $sql = "SELECT MAX(component_instance) AS last_instance 
-                FROM module_components 
+                FROM $getModuleTable 
                 WHERE module_id = :module_id";
 
             $stmt = $db->prepare($sql);
