@@ -12,7 +12,7 @@ class connect{
     private function __construct(){
         $dbHost = "127.0.0.1";
         $dbUser = "root";
-        $dbPassword = "alesm";
+        $dbPassword = "";
         $dbName = "cms";
 
 
