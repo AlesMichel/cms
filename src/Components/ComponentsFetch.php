@@ -3,6 +3,7 @@ include("Component.php");
 include("TextField.php");
 include('Image.php');
 
+
 class ComponentsFetch {
 
     public static function fetchAllComponents($db) {
