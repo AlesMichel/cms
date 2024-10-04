@@ -10,7 +10,7 @@ $moduleName = $_GET["module_name"];
 $_SESSION["current_module_id"] = module::getModuleId($moduleName, $db);
 $getTable = module::findModuleByName($moduleName, $db);
 
-$_SESSION["module_name"] = $moduleName;
+$_SESSION['module_name'] = $moduleName;
 
 //print navigaton
 $out .= cmsDefaultPage::buildNavTabs($moduleName);

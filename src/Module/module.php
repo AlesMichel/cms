@@ -6,15 +6,21 @@
 class module
 {
 
-    protected $name;
+    protected $moduleName;
     protected $tableName;
-    private $db;
+    private PDO $db;
 
-    public function __construct($name, $tableName)
+    public function __construct($moduleName, $tableName = null)
     {
-        $this->name = $name;
-        $this->tableName = $tableName;
+        $this->moduleName = $moduleName;
+
         $this->db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+
+        if($this->tableName == null){
+            $this->tableName = $tableName;
+        }else{
+            $this->tableName = $this->getTableViaName($moduleName);
+        }
     }
 
 
@@ -23,7 +29,7 @@ class module
         $moduleNameAlreadyExists = false;
         try {
             $queryCheck = $this->db->prepare("SELECT * FROM `modules` WHERE `module_name` = :name");
-            $queryCheck->bindParam(":name", $this->name);
+            $queryCheck->bindParam(":name", $this->moduleName);
             $queryCheck->execute();
 
             $result = $queryCheck->fetch(PDO::FETCH_ASSOC);
@@ -36,7 +42,7 @@ class module
 
             $sql = "INSERT INTO `modules` (module_name, module_table) VALUES (:moduleName, :moduleTableName)";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([':moduleName' => $this->name, ':moduleTableName' => $this->tableName]);
+            $stmt->execute([':moduleName' => $this->moduleName, ':moduleTableName' => $this->tableName]);
 
 
         } catch (PDOException $e) {
@@ -67,7 +73,7 @@ class module
                         component_id INT(11) UNSIGNED,
                         component_instance INT(11),
                         component_name VARCHAR(255),
-                        component_data BLOB,
+                        component_data LONGBLOB,
                         FOREIGN KEY (module_id) REFERENCES modules(id) ON
                             DELETE CASCADE, 
                         FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE
@@ -101,22 +107,21 @@ class module
         return $id;
     }
 
-    public static function deleteModule($moduleName, PDO $db): bool
-    {
+    public function deleteModule(){
         //first delete values in module_components
 
         //deletes module table based on modules->moduleTableName
         //find module table name
-        $moduleTableName = self::findModuleByName($moduleName, $db);
-
+        $moduleTableName = $this->getTableViaName($this->moduleName);
+        echo $this->moduleName;
         if ($moduleTableName != '') {
             //module table name found, now search for the actual table
             //now we can delete the entry in modules table
 
             try {
                 $sql = "DELETE FROM `modules` WHERE module_name = :moduleName";
-                $stmt = $db->prepare($sql);
-                $stmt->execute([':moduleName' => $moduleName]);
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([':moduleName' => $this->moduleName]);
             } catch (PDOException $e) {
                 echo "Error: " . $e->getMessage();
                 echo "Entry with module table cannot be deleted";
@@ -125,7 +130,7 @@ class module
             //now we can delete the module table
             try {
                 $sql = "DROP TABLE IF EXISTS `$moduleTableName`";
-                $stmt = $db->prepare($sql);
+                $stmt = $this->db->prepare($sql);
                 $stmt->execute();
             } catch (PDOException $e) {
                 echo "Error: " . $e->getMessage();
@@ -151,6 +156,7 @@ class module
         }
         return $getName;
     }
+
     public static function findModuleTableById(int $moduleId, $db){
         try {
             //find module table name from table modules
@@ -177,6 +183,62 @@ class module
         }
         return false;
     }
+
+    public function getTableViaId(int $id){
+        try {
+            //find module table name from table modules
+            $sql = "SELECT module_table FROM `modules` WHERE id = :moduleId";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':moduleId' => $id]);
+            $moduleTableName = '';
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $moduleTableName = $result['module_table'];
+            } else {
+                echo "findModuleByName::Name of module table not found";
+            }
+            //find modules table in DB
+            $queryCheck = $this->db->prepare("SHOW TABLES LIKE :tableName");
+            $queryCheck->execute([':tableName' => $moduleTableName]);
+            $tableExists = $queryCheck->fetch();
+            if ($tableExists) {
+                return $moduleTableName;
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+        return false;
+    }
+
+
+
+    public function getTableViaName(string $moduleName){
+        try {
+            //find module table name from table modules
+            $sql = "SELECT module_table FROM `modules` WHERE module_name = :moduleName";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':moduleName' => $moduleName]);
+            $moduleTableName = '';
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $moduleTableName = $result['module_table'];
+            } else {
+                echo "findModuleByName::Name of module table not found";
+            }
+            //find modules table in DB
+            $queryCheck = $this->db->prepare("SHOW TABLES LIKE :tableName");
+            $queryCheck->execute([':tableName' => $moduleTableName]);
+            $tableExists = $queryCheck->fetch();
+            if ($tableExists) {
+                return $moduleTableName;
+            }
+
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+        return false;
+    }
+
     //maybe rename to findModuleTableByName
     public static function findModuleByName(string $moduleName, PDO $db)
     {

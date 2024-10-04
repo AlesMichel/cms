@@ -2,6 +2,8 @@
 include("../../src/DbConnect/connect.php");
 include ("../../src/Module/module.php");
 include("../templates/cmsDefaultPage.class.php");
+include("../../src/Components/Component.php");
+include("../../src/Components/Image.php");
 
 // This is the index page for modules
 $out = '';
@@ -55,14 +57,23 @@ if ($moduleName) {
                     'component_data' => $component['component_data'],
                     'component_name' => $component['component_name']
                 ];
-
+                // Start the table row
                 $out .= "<tr>";
-                $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
-                $out .= "<td>" . htmlspecialchars($component['component_data']) . "</td>";
+
+                // Check if the component ID indicates an image component (e.g., ID 2)
+                if ($component['component_id'] == 2) {
+
+                    $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
+                    $out .= "<td>" . Image::viewImage($component['component_data']) . "</td>"; // Display image
+                } else {
+                    // Otherwise, display the component name and data as plain text
+                    $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
+                    $out .= "<td>" . htmlspecialchars($component['component_data']) . "</td>";
+                }
+
+                // Close the table row
                 $out .= "</tr>";
             }
-            // edit data for each instance
-            $out .= "<tr>";
             $out .= "<td colspan='2'>";
             $out .= "<form method='POST' action='editEntry.php'>";
             // Hidden input to send the instance ID

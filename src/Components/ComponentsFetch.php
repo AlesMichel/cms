@@ -113,9 +113,9 @@ class ComponentsFetch {
         $componentType = self::findComponentTypeById($componentId, $db);
         $out = '';
         if($componentType == 'text'){
-            $out .= TextField::getDataFields($componentId,$componentName);
+            $out .= TextField::getDataFieldsForEdit($componentId,$componentName, '');
         }elseif($componentType == 'image'){
-            $out .= Image::getDataFields($componentId,$componentName);
+            $out .= Image::getDataFieldsForEdit($componentId,$componentName, '');
         }
         else{
             $out .= 'No data fields found';

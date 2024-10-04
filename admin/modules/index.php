@@ -4,8 +4,11 @@ include("../templates/cmsDefaultPage.class.php");
 include('../../src/DbConnect/connect.php');
 $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 
-
 $out = '';
+
+
+
+
 $sqlSelect = "SELECT * FROM modules";
 $stmtSelect = $db->query($sqlSelect);
 
@@ -33,15 +36,7 @@ while($data = $stmtSelect->fetch(PDO::FETCH_ASSOC)){
             
         </tr>";
 }
-
-
-
-
-
-
-   $out .= '</tbody></table>';
-
-
+$out .= '</tbody></table>';
 
 $buildPage = new cmsDefaultPage($out);
 $buildPage->buildLayout();

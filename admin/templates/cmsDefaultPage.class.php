@@ -1,6 +1,7 @@
 <?php
 //check login
 //basic class for building default cms page
+
 session_start();
 if(!isset($_SESSION["user"])){
     header("Location:login.php");
@@ -27,6 +28,23 @@ class cmsDefaultPage {
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
    </head>';
+    }
+    private function getAlerts(){
+        $out = '';
+        if (isset($_SESSION['cms_message'])) {
+        $out .= '<div id="cmsAlert" class="alert alert-success alert-dismissible fade show" role="alert">'
+        . $_SESSION['cms_message'] .
+        '</div>';
+        unset($_SESSION['cms_message']);
+        }
+        if (isset($_SESSION['cms_message_error'])) {
+            $out .= '<div id="cmsAlert" class="alert alert-danger alert-dismissible fade show" role="alert">'
+                . $_SESSION['cms_message_error'] .
+                '</div>';
+            unset($_SESSION['cms_message_error']);
+        }
+
+        return $out;
     }
     private function buildNavbar(): string{
         return '<nav class="navbar bg-body-tertiary">
@@ -58,12 +76,14 @@ class cmsDefaultPage {
         echo '<!doctype html>
               <html lang="en" data-bs-theme="dark">';
         echo $this->buildHead();
+        echo $this->getAlerts();
         echo $this->buildNavbar();
         echo '<div class="container my-5">';
 
         echo $this->out;
 
         echo '</div>';
+        echo $this->buildFooter();
         echo '</html>';
     }
 
@@ -108,5 +128,7 @@ class cmsDefaultPage {
     private function buildFooter()
     {
 
+        //get scripts
+        return '<script src="'.ABS_URL.'/templates/defaultPage.js"></script>';
     }
 }

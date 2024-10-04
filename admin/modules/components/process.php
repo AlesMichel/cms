@@ -10,14 +10,14 @@ $db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //determine if i am creating, updating or deleting
     $action = $_POST["action"] ?? null;
+    $moduleId = $_SESSION["current_module_id"] ?? null;
 
-    if ($action == "create") {
-        $moduleId = $_SESSION["current_module_id"] ?? null;
+    if ($action == "create" && $moduleId != null) {
         $componentData = $_POST["component_data"] ?? '';
 
-        if ($moduleId) {
             $componentName = $_POST["component_name"];
             $componentId = $_SESSION["component_id"];
+            echo $componentId;
             $getTableName = module::findModuleTableById($moduleId, $db);
             //create a match instance => create fields for all instances
             $lastInstance = component::getLastInstance($moduleId, $db);
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }}
             header("Location: ../../modules/index.php");
 
-            }
+
     } else if ($action == "delete") {
         $componentPassData = $_SESSION['component_pass_data'];
         $componentId = $componentPassData['component_id'];
@@ -95,8 +95,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
 //                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
 //                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
-                            $getTableName = module::findModuleTableById($moduleId, $db);
 
+                            echo "Data size: " . strlen($componentData) . " bytes";
+
+                            // If data is base64, you might need to decode it:
+                            if (strpos($componentData, 'data:image/') === 0) {
+                                $componentData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $componentData));
+                                echo "Decoded image size: " . strlen($componentData) . " bytes";
+                            }
+
+                            // Proceed to insert the data into the database
+
+
+                            $getTableName = module::findModuleTableById($moduleId, $db);
+                            echo $componentData;
                             //now we got all field data and we are ready to insert them
                             try {
                                 $sql = "INSERT INTO $getTableName
@@ -112,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ':component_data' => $componentData,
                                     ':component_name' => $componentName
                                 ]);
-                                header("Location: ../../modules/index.php");
+
                             } catch (PDOException $e) {
                                 echo "Error: " . $e->getMessage();
                             }
@@ -123,12 +135,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } catch (PDOException $e) {
                     echo "Error: " . $e->getMessage();
                 }
+
+
             } else {
                 echo "No component pass data available.";
             }
         } else {
             echo "No component pass data available.";
         }
+
+
     }else if($action == "updateData"){
 
 
