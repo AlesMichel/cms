@@ -271,20 +271,21 @@ class module
     public static function getModuleComponents(int $moduleId, PDO $db){
         // Step 1: Fetch all components that match module ID
         $getModuleTable = module::findModuleTableById($moduleId, $db);
-        if($getModuleTable){
-        try{
 
+        if($getModuleTable){
+            $instance = 1;
+
+            //mozna udelat nejaky base component set, ktery bude mit instance 0 a bude hidden a nebude mit data
+        try{
             $sql = "SELECT * FROM $getModuleTable WHERE module_id = :moduleId AND component_instance = :component_instance";
             $stmt = $db->prepare($sql);
-            $stmt->execute([':moduleId' => $moduleId, ':component_instance' => '1']);
+            $stmt->execute([':moduleId' => $moduleId, ':component_instance' => $instance]);
             $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
             if (!empty($moduleComponents)) {
                 return $moduleComponents;
             }else{
                 return "This module has no components";
             }
-
         }catch (PDOException $e) {
             echo "Error fetching module data: " . $e->getMessage();
             return null;

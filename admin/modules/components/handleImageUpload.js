@@ -36,7 +36,8 @@ function handleImageUpload(inputElement, componentName) {
                     console.log(croppedImageDataUrl);
 
                     // Set the base64 data into the hidden input field
-                    const hiddenInput = document.getElementById('component_' + componentName);
+                    const hiddenInput = document.getElementById('dataPassImg_' + componentName);
+                    console.log(hiddenInput)
                     if (hiddenInput) {
                         hiddenInput.value = croppedImageDataUrl;
                     }

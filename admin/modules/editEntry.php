@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //get module id and instance id, so I know where to update data
     $moduleId = $_SESSION['current_module_id'];
     $instance = $_POST["instance_id"];
-    echo $instance;
     // Fetch the module components
     $moduleComponents = module::getModuleDataForInstance($moduleId, $instance, $db);
 //    var_dump($moduleComponents);
@@ -35,9 +34,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // creates the fields
             $out .= ComponentsFetch::editComponentData($componentId, $componentName, $componentData , $db);
         }
-        $out .= "<input type='hidden' name='action' value='updateData'>";
+
         $out .= "<input type='hidden' name='instance_id' value='$instance'>";
-        $out .= "<button class='mt-3 btn btn-primary'>Vložit</button>";
+        $out .= "<button name='action' value='updateData' class='mt-3 btn btn-primary'>Vložit</button>";
+        $out .= "<button name='action' value='deleteData' class='mt-3 btn btn-danger ms-3' >Smazat záznam</button>";
         $out .= "</form>";
 
     } else {
@@ -45,6 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+$out .= '<script src="'.ABS_URL.'/modules/components/handleImageUpload.js" ></script>';
+$out .='<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>';
 
 
 $buildPage = new cmsDefaultPage($out);

@@ -131,6 +131,7 @@ class ComponentsFetch {
         if($componentType == 'text'){
             $out .= TextField::getDataFieldsForEdit($componentId,$componentName, $componentData);
         }elseif ($componentType == 'image'){
+//            $out .= Image::viewImage($componentData);
             $out .= Image::getDataFieldsForEdit($componentId,$componentName, $componentData);
         }
         else{

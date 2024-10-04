@@ -47,7 +47,7 @@ class Image extends Component
         }
 
         // Return the HTML to display the image
-        return '<img src="' . htmlspecialchars($imageSrc) . '" alt="Image" class="img-thumbnail" />';
+        return '<img src="' . htmlspecialchars($imageSrc) . '" style="max-width:200px;" alt="Image" class="img-thumbnail" />';
     }
 
 
@@ -59,17 +59,21 @@ class Image extends Component
 
         if($componentData){
 
-                $out .= "<img id='preview_" . $componentId . "' src='" . $componentData . "' alt='img-field' class='img-thumbnail' />";
+//                $out .= "<img id='preview_" . $componentId . "' src='" . $componentData . "' alt='img-field' class='img-thumbnail' />";
+            self::viewImage($componentData);
 
 
         }else{
             $out .= ' / Záznam zatím nemá data';
         }
-        $out .= '<img id="imagePreview' . $componentName . '" src="' . $componentData . '" class="img-thumbnail d-none" />';
+        $out .= '<img id="imagePreview' . $componentName . '" src="" class="img-thumbnail d-none" />';
         $out .= '<button class="btn btn-primary opacity-0" id="cropBtn' . $componentName .'">Použít</button>';
-        //hidden input
-        $out .= '<input type="hidden" name="component_' . $componentName . '" id="component_'.$componentName.'" />';
-        $out .= "<input onchange='handleImageUpload(this,\"" . $componentName . "\")' type='file' name='input_" . $componentName ."'  class='form-control mt-3' id='image".$componentName."' value='" . $componentData ."' accept='image/png, image/gif, image/jpeg image/webp'/>";
+
+        //hidden input for passing data
+        $out .= "<input type='hidden' id='dataPassImg" . $componentName . " ' value='" . $componentData . "' name='component_" . $componentName ."' />";
+
+        $out .= "<input onchange='handleImageUpload(this,\"" . $componentName . "\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
+
 
 
         return $out;

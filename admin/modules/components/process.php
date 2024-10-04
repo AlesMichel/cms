@@ -17,11 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $componentName = $_POST["component_name"];
             $componentId = $_SESSION["component_id"];
-            echo $componentId;
+
             $getTableName = module::findModuleTableById($moduleId, $db);
             //create a match instance => create fields for all instances
             $lastInstance = component::getLastInstance($moduleId, $db);
-            echo $lastInstance;
+
             //sql for batch
             if($getTableName){
 
@@ -143,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             echo "No component pass data available.";
         }
-
+        header("Location: ../../modules/index.php");
 
     }else if($action == "updateData"){
 
@@ -214,7 +214,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
 
-    }else{
+    }else if($action == 'deleteData'){
+
+
+        if(isset($_SESSION['component_pass_data'])){
+            //        var_dump($_SESSION['component_pass_data']);
+            //get instance, get module id
+            $instance = $_SESSION['current_instance'];
+            $moduleId = $_SESSION['current_module_id'];
+
+            //then delete via it
+
+            $getTableName = module::findModuleTableById($moduleId, $db);
+            if($getTableName){
+
+                try{
+                    $sql = "DELETE FROM $getTableName 
+                                WHERE module_id = :module_id 
+                                AND component_instance = :instance_id";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute([
+                        ':module_id' => $moduleId,
+                        ':instance_id' => $instance,
+                    ]);
+
+                }catch (PDOException $e) {
+                    echo "Error: " . $e->getMessage();
+                }
+            }
+            //header
+            header("Location: ../../modules/index.php");
+        }
+
+    } else{
       echo  "Unknown action";
     }
 
