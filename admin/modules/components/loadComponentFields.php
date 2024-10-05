@@ -1,9 +1,15 @@
 <?php
-session_start();
-include("../../../src/Components/ComponentsFetch.php");
-include("../../../src/DbConnect/connect.php");
 
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+require_once(__DIR__."/../../DbConnect/connect.php");
+require_once(__DIR__."/ComponentsFetch.php");
+use \cms\DbConnect\connect;
+use components\ComponentsFetch\ComponentsFetch;
+
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
+
+
+
+session_start();
 
 // loadComponentFields.php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

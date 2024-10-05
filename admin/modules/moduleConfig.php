@@ -1,18 +1,11 @@
 <?php
 
-include("../../src/DbConnect/connect.php");
-include "../../src/Module/module.php";
 include("../templates/cmsDefaultPage.class.php");
 
 $out = '';
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
 $moduleName = $_GET["module_name"];
-$_SESSION["current_module_id"] = module::getModuleId($moduleName, $db);
-$getTable = module::findModuleByName($moduleName, $db);
-
 $_SESSION['module_name'] = $moduleName;
-
-//print navigaton
+//print navigation
 $out .= cmsDefaultPage::buildNavTabs($moduleName);
 
 $out .= '<h5>Konfigurace modulu</h5>';
@@ -43,13 +36,7 @@ $out .= "<form class='mt-3' method='post' action='process.php' >
     </div>
   </div>
 </div>
-
-
-
         </form>";
-
-
-
 
 
 $buildPage = new cmsDefaultPage($out);

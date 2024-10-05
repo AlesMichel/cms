@@ -1,18 +1,15 @@
 <?php
+namespace components;
+include_once(__DIR__."/../module.php");
 
+use cms\Module\module\module;
+use PDO;
+use PDOException;
 
-abstract class Component{
+class Component extends module {
     protected $name;
     protected $type;
 
-    public function __construct($name, $type)
-    {
-        $this->name = $name;
-        $this->type = $type;
-
-    }
-
-    abstract public function render();
 
 
     public static function getComponentById($id, $db)
@@ -30,7 +27,6 @@ abstract class Component{
         }
         return '';
     }
-
     public static function editComponentData($id ,$moduleId, $componentId, $instance, $newData, $db)
     {
         $getModuleTable = module::findModuleTableById($moduleId, $db);

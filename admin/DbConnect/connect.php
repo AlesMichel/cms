@@ -1,6 +1,6 @@
 <?php
 
-namespace phpCms\DbConnect;
+namespace cms\DbConnect;
 
 use PDO;
 use PDOException;

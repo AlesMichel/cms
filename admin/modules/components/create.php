@@ -1,13 +1,17 @@
 <?php
 
-include("../../../src/DbConnect/connect.php");
-include "../../../src/Module/module.php";
-include("../../templates/cmsDefaultPage.class.php");
-include("../../../src/Components/ComponentsFetch.php");
 
+
+include("../../templates/cmsDefaultPage.class.php");
+require_once("../../DbConnect/connect.php");
+require_once("../../modules/components/ComponentsFetch.php");
+require_once("../../modules/components/ComponentsFetch.php");
 echo '<script src="handleDynamicForms.js"></script>';
 
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+use \cms\DbConnect\connect;
+use components\ComponentsFetch\ComponentsFetch;
+
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 //    $currentModule = $_GET['current_module']; // Get current module

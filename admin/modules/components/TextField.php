@@ -1,14 +1,12 @@
 <?php
-
-
+namespace components\TextField;
+require_once(__DIR__."/Component.php");
+use components\Component;
 
 class TextField extends Component
 {
     protected $placeholder = 'Text...';
-    public function __construct($name, $type)
-    {
-        parent::__construct($name, 'textfield');
-    }
+
     public function render(): string
     {
         return $this->name;

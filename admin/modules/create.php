@@ -1,6 +1,5 @@
 <?php
-include("../../src/DbConnect/connect.php");
-include "../../src/Module/module.php";
+
 include("../templates/cmsDefaultPage.class.php");
 
 $out = '<div class="create-form w-100 mx-auto p-4" style="max-width: 700px;">

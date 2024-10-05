@@ -1,8 +1,13 @@
 <?php
-include("Component.php");
-include("TextField.php");
-include('Image.php');
 
+namespace components\ComponentsFetch;
+require_once(__DIR__."/TextField.php");
+require_once(__DIR__."/Image.php");
+
+use components\Image\Image;
+use components\TextField\TextField;
+use PDO;
+use PDOException;
 
 class ComponentsFetch {
 

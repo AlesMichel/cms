@@ -1,18 +1,13 @@
 <?php
 
 include("../templates/cmsDefaultPage.class.php");
-include('../../src/DbConnect/connect.php');
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+require_once("../dbConnect/connect.php");
+use \cms\DbConnect\connect;
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 $out = '';
-
-
-
-
 $sqlSelect = "SELECT * FROM modules";
 $stmtSelect = $db->query($sqlSelect);
-
-
 
 $out .= '<table class="table tabled-bordered">
             <thead>

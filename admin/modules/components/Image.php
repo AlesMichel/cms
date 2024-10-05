@@ -1,14 +1,12 @@
 <?php
-
-
+namespace components\Image;
+require_once(__DIR__."/Component.php");
+use components\Component;
 
 class Image extends Component
 {
     protected $placeholder = 'Text...';
-    public function __construct($name, $type)
-    {
-        parent::__construct($name, 'image');
-    }
+
     public function render(): string
     {
         return $this->name;

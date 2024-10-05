@@ -1,10 +1,16 @@
 <?php
+
+use components\ComponentsFetch\ComponentsFetch;
+
 include("../../templates/cmsDefaultPage.class.php");
-include("../../../src/Components/ComponentsFetch.php");
-include("../../../src/DbConnect/connect.php");
+require_once(__DIR__."/../module.php");
+require_once(__DIR__."/ComponentsFetch.php");
+require_once(__DIR__."/../../DbConnect/connect.php");
+require_once(__DIR__."/../../config.php");
 
 //deletes a component based on name
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
+
 $out = '';
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){

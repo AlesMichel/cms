@@ -1,13 +1,16 @@
 <?php
-include("../../src/DbConnect/connect.php");
-include "../../src/Module/module.php";
 
-include("../../src/Components/ComponentsFetch.php");
+use cms\Module\module\module;
+use components\ComponentsFetch\ComponentsFetch;
 
 include("../templates/cmsDefaultPage.class.php");
+require_once(__DIR__."/module.php");
+require_once(__DIR__."/components/ComponentsFetch.php");
+require_once(__DIR__."/../DbConnect/connect.php");
+require_once(__DIR__."/../config.php");
 
 $out ='';
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

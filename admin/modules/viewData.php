@@ -1,29 +1,47 @@
 <?php
-include("../../src/DbConnect/connect.php");
-include ("../../src/Module/module.php");
+
+//conn
+require_once("../dbConnect/connect.php");
+use \cms\DbConnect\connect;
+//module
+require_once("./module.php");
+use cms\Module\module\module;
+use components\Component;
+//template
 include("../templates/cmsDefaultPage.class.php");
-include("../../src/Components/Component.php");
-include("../../src/Components/Image.php");
+//components
+require_once("./components/Component.php");
+require_once("./components/Image.php");
+
 
 // This is the index page for modules
 $out = '';
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 $moduleName = $_GET["module_name"];
 $_SESSION["module_name"] = $moduleName;
-$getTable = module::findModuleByName($moduleName, $db);
+$module = new module($moduleName);
+$moduleId = $module->getID();
 
 // Print navigation
 $out .= cmsDefaultPage::buildNavTabs($moduleName);
 
 if ($moduleName) {
     // Get module ID by its name
-    $moduleId = module::getModuleId($moduleName, $db);
-    $moduleComponents = module::getModuleData($moduleId, $db);
+    $moduleComponents = $module->getModuleData();
+    $highestInstance = component::getLastInstance($moduleId, $db);
 
     // Check if any components are found for this module
-    if ($moduleComponents === null || empty($moduleComponents)) {
+    if (empty($moduleComponents)) {
         $out .= "<p>No components found for this module.</p>";
+    } elseif ($highestInstance === 0) {
+        $out .= "<p>Tento modul nema zadne záznamy</p>";
+        $_SESSION['current_module_id'] = $moduleId;
+        $out .= "<form method='POST' action='newEntry.php' class=''>";
+        $out .= "<button class='btn btn-primary btn-sm my-3' type='submit'>Přidat nový záznam</button>";
+        $out .= "</form>";
     } else {
+
+
         $out .= "<div class=''><h5>Záznamy pro modul: " . htmlspecialchars($moduleName) . " / id: " . htmlspecialchars($moduleId) . "</h5></div>";
 
         // Add new data set
@@ -34,59 +52,58 @@ if ($moduleName) {
 
         // Loop through each component instance and display the components
         foreach ($moduleComponents as $instance => $components) {
+            foreach ($components as $component) {
 
-
-            // View all data
-            $out .= "<table class='table table-bordered'>";
-            $out .= "<thead>
+                if ($component['component_instance'] != 0) {
+                    $out .= "<table class='table table-bordered'>";
+                    $out .= "<thead>
                      <tr>
                         <th>Název komponenty</th>
                         <th>Hodnota komponenty</th>
                      </tr>
                  </thead>";
-            $out .= "<tbody>";
-
-            foreach ($components as $component) {
+                    $out .= "<tbody>";
+                }
 
                 // Store component data in the session
                 $_SESSION['component_pass_data'][] = [
                     'id' => $component['id'],
                     'module_id' => $moduleId,
                     'component_id' => $component['component_id'],
-                    'instance' => $instance,
+                    'instance' => $component['component_instance'],
                     'component_data' => $component['component_data'],
                     'component_name' => $component['component_name']
                 ];
                 // Start the table row
-                $out .= "<tr>";
+                if ($component['component_instance'] > 0) {
+                    $out .= "<tr>";
+                    // Check if the component ID indicates an image component (e.g., ID 2)
+                    if ($component['component_id'] == 2) {
+                        $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
+                        $out .= "<td>" . Image::viewImage($component['component_data']) . "</td>"; // Display image
+                    } else {
+                        // Otherwise, display the component name and data as plain text
+                        $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
+                        $out .= "<td>" . htmlspecialchars($component['component_data']) . "</td>";
+                    }
 
-                // Check if the component ID indicates an image component (e.g., ID 2)
-                if ($component['component_id'] == 2) {
+                    // Close the table row
+                    $out .= "</tr>";
 
-                    $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
-                    $out .= "<td>" . Image::viewImage($component['component_data']) . "</td>"; // Display image
-                } else {
-                    // Otherwise, display the component name and data as plain text
-                    $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
-                    $out .= "<td>" . htmlspecialchars($component['component_data']) . "</td>";
+                    $out .= "<td colspan='2'>";
+                    $out .= "<form method='POST' action='editEntry.php'>";
+                    // Hidden input to send the instance ID
+                    $out .= "<input type='hidden' name='instance_id' value='" . htmlspecialchars($instance) . "'>";
+                    $out .= "<button class='btn btn-primary btn-sm' type='submit'>Upravit záznam</button>";
+                    $out .= "</form>";
+                    $out .= "</td>";
+                    $out .= "</tr>";
+
+                    $out .= "</tbody>";
+                    $out .= "</table>";
+
                 }
-
-                // Close the table row
-                $out .= "</tr>";
             }
-            $out .= "<td colspan='2'>";
-            $out .= "<form method='POST' action='editEntry.php'>";
-            // Hidden input to send the instance ID
-            $out .= "<input type='hidden' name='instance_id' value='" . htmlspecialchars($instance) . "'>";
-            $out .= "<button class='btn btn-primary btn-sm' type='submit'>Upravit záznam</button>";
-            $out .= "</form>";
-            $out .= "</td>";
-            $out .= "</tr>";
-
-
-            $out .= "</tbody>";
-            $out .= "</table>";
-
         }
 
 

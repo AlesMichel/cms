@@ -1,16 +1,24 @@
 <?php
+
+use cms\Module\module\module;
+use components\Component;
+
 session_start();
 
-include("../../../src/Module/Module.php");
-include("../../../src/Components/ComponentsFetch.php");
-include("../../../src/DbConnect/connect.php");
-include("../../config.php");
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+
+require_once(__DIR__."/../module.php");
+require_once(__DIR__."/ComponentsFetch.php");
+require_once(__DIR__."/../../DbConnect/connect.php");
+require_once(__DIR__."/../../config.php");
+
+
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //determine if i am creating, updating or deleting
     $action = $_POST["action"] ?? null;
     $moduleId = $_SESSION["current_module_id"] ?? null;
+    $module = new Module(null, null, $moduleId);
 
     if ($action == "create" && $moduleId != null) {
         $componentData = $_POST["component_data"] ?? '';
@@ -18,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $componentName = $_POST["component_name"];
             $componentId = $_SESSION["component_id"];
 
-            $getTableName = module::findModuleTableById($moduleId, $db);
+            $getTableName = $module->getTableName();
             //create a match instance => create fields for all instances
             $lastInstance = component::getLastInstance($moduleId, $db);
 
@@ -29,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
 
             if($lastInstance){
-                for ($i = 1; $i <= $lastInstance; $i++) {
+                for ($i = 0; $i <= $lastInstance; $i++) {
                 //batch sql until i match instance
                 try {
                     $stmt = $db->prepare($sql);
@@ -54,23 +62,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $componentId = $componentPassData['component_id'];
         $componentName = $componentPassData['component_name'];
         $moduleId = $componentPassData["module_id"];
-        $getTableName = module::findModuleTableById($moduleId, $db);
-        try {
-            $sql = "DELETE FROM $getTableName
+        $getTableName = $module->getTableName();
+        if($getTableName){
+            try {
+                $sql = "DELETE FROM $getTableName
                 WHERE module_id = :module_id
                   AND component_id = :component_id
                   AND component_name = :component_name";
 
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                ':module_id' => $moduleId,
-                ':component_id' => $componentId,
-                ':component_name' => $componentName
-            ]);
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    ':module_id' => $moduleId,
+                    ':component_id' => $componentId,
+                    ':component_name' => $componentName
+                ]);
 
-            header("Location: ../../modules/index.php");
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
+                header("Location: ../../modules/index.php");
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
         }
 
     //inserting data
@@ -146,8 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: ../../modules/index.php");
 
     }else if($action == "updateData"){
-
-
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
 //        var_dump($_SESSION['component_pass_data']);
@@ -225,7 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             //then delete via it
 
-            $getTableName = module::findModuleTableById($moduleId, $db);
+            $getTableName = $module->getTableName();
             if($getTableName){
 
                 try{

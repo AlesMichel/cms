@@ -49,7 +49,7 @@ class cmsDefaultPage {
     private function buildNavbar(): string{
         return '<nav class="navbar bg-body-tertiary">
   <div class="container">
-    <a class="navbar-brand" href="http://localhost/phpCmsGit/cms/admin/modules/index.php">Administrace</a>
+    <a class="navbar-brand" href="'. ABS_URL .'/modules/index.php">Administrace</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
       <span class="navbar-toggler-icon"></span>
     </button>

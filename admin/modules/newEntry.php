@@ -1,21 +1,34 @@
 <?php
-include("../../src/DbConnect/connect.php");
-include "../../src/Module/module.php";
-
-include("../../src/Components/ComponentsFetch.php");
 
 include("../templates/cmsDefaultPage.class.php");
+require_once(__DIR__."/module.php");
+require_once(__DIR__."/components/ComponentsFetch.php");
+require_once(__DIR__."/../DbConnect/connect.php");
+require_once(__DIR__."/../config.php");
+
+use cms\Module\module\module;
+use components\Component;
+use components\ComponentsFetch\ComponentsFetch;
 
 $out ='';
-$db = \phpCms\DbConnect\connect::getInstance()->getConnection();
+$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $moduleId = $_SESSION['current_module_id'];
+    $module = new module(null, null, $moduleId);
+
 
     // Fetch the module components
-    $moduleComponents = module::getModuleComponents($moduleId, $db);
-//    var_dump($moduleComponents);
+//    $moduleComponents = module::getModuleComponents($moduleId, $db);
+    $status = $module->getModuleComponentList();
+    $moduleComponents = '';
+    if($status['success']){
+        $moduleComponents = $status['data'];
+    }else{
+        $out .= $status['error'];
+    }
+
     if (!empty($moduleComponents)) {
         // Get the latest instance
         $lastInstance = component::getLastInstance($moduleId, $db);
