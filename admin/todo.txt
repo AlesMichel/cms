@@ -5,10 +5,11 @@
 
 8. when creating a new component check is there is already a component with the name
 10. edit button and delete button for each entry - done almost
-11. create file system
-
+11. create file system - done, ted resit mazani
+12. kdyz pridam novou komponentu tak to vytvori i pro neexistujici instance - done
 //
 pridat do adminu pro kazdy komponent if required
+if update data tak updatetnout jenom ty data, kde jsem upravil???
 
     free hosting
 

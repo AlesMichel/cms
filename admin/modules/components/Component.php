@@ -10,7 +10,9 @@ class Component extends module {
     protected $name;
     protected $type;
 
-
+    public function __construct($moduleName = null, $tableName = null, $moduleId = null) {
+        parent::__construct($moduleName, $tableName, $moduleId);
+    }
 
     public static function getComponentById($id, $db)
     {
@@ -49,6 +51,36 @@ class Component extends module {
         } catch (PDOException $e) {
             echo "Data not updated: " . $e->getMessage();
         }
+    }
+
+    /**
+     * Method for getting all current instances for current module
+     * @return array
+     */
+    public function getAllCurrentComponentInstances():array{
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        $instances = [];
+        try{
+            $sql = "SELECT component_instance FROM " . $this->getTableName() . " WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(["module_id" => $this->getID()]);
+            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if($instances){
+                $result["success"] = true;
+                $result["data"] = $instances;
+            }else{
+                $result["error"] = 'Failed to fetch current instances instances';
+            }
+
+        }catch (PDOException $e) {
+            $result['error'] = "Error fetching module data: " . $e->getMessage();
+        }
+        return $result;
     }
 
     public static function getLastInstance(int $moduleId, PDO $db){

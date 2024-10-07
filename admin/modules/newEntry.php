@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 
-$out .= '<script src="'.ABS_URL.'/modules/components/handleImageUpload.js" ></script>';
+$out .= '<script src="'.ABS_URL.'/modules/components/handleImageUpload.js?v='.time().'" ></script>';
 $out .='<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>';
 

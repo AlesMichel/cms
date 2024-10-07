@@ -1,10 +1,14 @@
 <?php
 
-require_once("./components/Component.php");
-require_once("./components/Image.php");
-require_once("../dbConnect/connect.php");
-require_once("./module.php");
-include("../templates/cmsDefaultPage.class.php");
+require_once __DIR__ . '/admin/config.php';
+require_once ABS_PATH . "/config.php";
+require_once("./client/buildPage.php");
+
+
+require_once(ABS_PATH . '/DbConnect/connect.php');
+require_once(ABS_PATH . '/modules/components/Component.php');
+require_once(ABS_PATH . '/modules/components/Image.php');
+require_once(ABS_PATH . '/modules/module.php');
 
 use cms\Module\module\module;
 use components\Component;
@@ -13,13 +17,12 @@ use components\Image\Image;
 // This is the index page for modules
 $out = '';
 $db = \cms\DbConnect\connect::getInstance()->getConnection();
-$moduleName = $_GET["module_name"];
-$_SESSION["module_name"] = $moduleName;
+$moduleName = 'modul1';
 $module = new module($moduleName);
 $moduleId = $module->getID();
 
 // Print navigation
-$out .= cmsDefaultPage::buildNavTabs($moduleName);
+
 
 if ($moduleName) {
     // Get module ID by its name
@@ -31,20 +34,12 @@ if ($moduleName) {
         $out .= "<p>No components found for this module.</p>";
     } elseif ($highestInstance === 0) {
         $out .= "<p>Tento modul nema zadne záznamy</p>";
-        $_SESSION['current_module_id'] = $moduleId;
-        $out .= "<form method='POST' action='newEntry.php' class=''>";
-        $out .= "<button class='btn btn-primary btn-sm my-3' type='submit'>Přidat nový záznam</button>";
-        $out .= "</form>";
+
     } else {
 
 
         $out .= "<div class=''><h5>Záznamy pro modul: " . htmlspecialchars($moduleName) . " / id: " . htmlspecialchars($moduleId) . "</h5></div>";
 
-        // Add new data set
-        $_SESSION['current_module_id'] = $moduleId;
-        $out .= "<form method='POST' action='newEntry.php' class=''>";
-        $out .= "<button class='btn btn-primary btn-sm my-3' type='submit'>Přidat nový záznam</button>";
-        $out .= "</form>";
 
         // Loop through each component instance and display the components
         foreach ($moduleComponents as $instance => $components) {
@@ -88,14 +83,7 @@ if ($moduleName) {
                         $out .= "</tr>";
                     }
                 }
-                $out .= "<td colspan='2'>";
-                $out .= "<form method='POST' action='editEntry.php'>";
-                // Hidden input to send the instance ID
-                $out .= "<input type='hidden' name='instance_id' value='" . htmlspecialchars($instance) . "'>";
-                $out .= "<button class='btn btn-primary btn-sm' type='submit'>Upravit záznam</button>";
-                $out .= "</form>";
-                $out .= "</td>";
-                $out .= "</tr>";
+
 
             }
             $out .= "</tbody>";
@@ -109,5 +97,5 @@ if ($moduleName) {
     $out .= "Module table does not exist";
 }
 
-$buildPage = new cmsDefaultPage($out);
+$buildPage = new buildPage($out);
 $buildPage->buildLayout();

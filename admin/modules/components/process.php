@@ -2,6 +2,7 @@
 
 use cms\Module\module\module;
 use components\Component;
+use components\Image\Image;
 
 session_start();
 
@@ -11,7 +12,7 @@ require_once(__DIR__."/ComponentsFetch.php");
 require_once(__DIR__."/../../DbConnect/connect.php");
 require_once(__DIR__."/../../config.php");
 
-
+$component = new Component(null,null,39);
 $db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -27,33 +28,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $componentId = $_SESSION["component_id"];
 
             $getTableName = $module->getTableName();
-            //create a match instance => create fields for all instances
-            $lastInstance = component::getLastInstance($moduleId, $db);
+
+            //fetch all instances
+            $componentInstancesFetch = $component->getAllCurrentComponentInstances();
+            if($componentInstancesFetch['success'] = true){
+            $componentInstancesAll = $componentInstancesFetch['data'];
+            if($componentInstancesAll == null){
+
+                //now get unique instances
+                $componentInstancesArray= array_column($componentInstancesAll, 'component_instance');
+                $componentInstancesUnique = array_unique($componentInstancesArray);
+
+            }
+
+                //this is the firs component in current module
+
+
+                //sql for batch
+                if($getTableName){
+
+                    $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_data, component_name) 
+                    VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
+                            try {
+                                $stmt = $db->prepare($sql);
+                                $stmt->execute([
+                                    ':module_id' => $moduleId,
+                                    ':component_id' => $componentId,
+                                    ':instance_id' => 0,
+                                    ':component_data' => $componentData,
+                                    ':component_name' => $componentName
+                                ]);
+                            }catch(PDOException $e){
+                                echo "Error: " . $e->getMessage();
+                            }
+
+                    header("Location: ../../modules/index.php");
+                }
+            }
 
             //sql for batch
             if($getTableName){
-
             $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_data, component_name) 
                     VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
+            if(!empty($componentInstancesUnique)){
+                foreach($componentInstancesUnique as $componentInstance){
 
-            if($lastInstance){
-                for ($i = 0; $i <= $lastInstance; $i++) {
-                //batch sql until i match instance
-                try {
+                    try {
                     $stmt = $db->prepare($sql);
                     $stmt->execute([
                         ':module_id' => $moduleId,
                         ':component_id' => $componentId,
-                        ':instance_id' => $i,
+                        ':instance_id' => $componentInstance,
                         ':component_data' => $componentData,
                         ':component_name' => $componentName
                     ]);
                 }catch(PDOException $e){
                     echo "Error: " . $e->getMessage();
                 }
+
+                }
             }
 
-            }}
+            }
             header("Location: ../../modules/index.php");
 
 
@@ -101,24 +137,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Access the component ID and name
                             $componentId = $component[0]; // First element: component ID
                             $componentName = $component[1]; // Second element: component Name
-                            $componentData = $_POST['component_' . $componentName] ?? null; // get value of field
-//                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
-//                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
-//                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
+                            $componentData = $_POST['component_' . $componentName] ?? null;// get value
 
-                            echo "Data size: " . strlen($componentData) . " bytes";
-
-                            // If data is base64, you might need to decode it:
-                            if (strpos($componentData, 'data:image/') === 0) {
-                                $componentData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $componentData));
-                                echo "Decoded image size: " . strlen($componentData) . " bytes";
+                            if($componentId === 2){
+                                $image = new \components\Image\Image(null, null, $moduleId);
+                                $res = $image->uploadImage($componentData);
+                                $componentData = $res['data'];
                             }
 
-                            // Proceed to insert the data into the database
+                            $getTableName = $module->getTableName();
 
-
-                            $getTableName = module::findModuleTableById($moduleId, $db);
-                            echo $componentData;
                             //now we got all field data and we are ready to insert them
                             try {
                                 $sql = "INSERT INTO $getTableName
@@ -146,15 +174,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "Error: " . $e->getMessage();
                 }
 
-
             } else {
                 echo "No component pass data available.";
             }
         } else {
             echo "No component pass data available.";
         }
-        header("Location: ../../modules/index.php");
 
+        header("Location: ../../modules/index.php");
     }else if($action == "updateData"){
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
@@ -175,12 +202,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $componentId = $component[0]; // First element: component ID
                             $componentName = $component[1]; // Second element: component Name
                             $componentData = $_POST['component_' . $componentName] ?? null;
-                            $getTableName = module::findModuleTableById($moduleId, $db);
+                            $getTableName = $module->getTableName();
                             // get value of field
 //                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
 //                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
 //                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
 
+                            if($componentId === 2){
+                                $image = new \components\Image\Image(null, null, $moduleId);
+                                $res = $image->uploadImage($componentData);
+                                var_dump($res);
+                                $componentData = $res['data'];
+                            }
 
                             //now we got all field data and we are ready to insert them
                             try {
@@ -222,23 +255,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
 
-    }else if($action == 'deleteData'){
+    }else if($action == 'deleteData') {
 
 
-        if(isset($_SESSION['component_pass_data'])){
+        if (isset($_SESSION['component_pass_data'])) {
             //        var_dump($_SESSION['component_pass_data']);
             //get instance, get module id
             $instance = $_SESSION['current_instance'];
             $moduleId = $_SESSION['current_module_id'];
 
+            $componentPassData = $_SESSION['component_pass_data'];
             //then delete via it
 
             $getTableName = $module->getTableName();
-            if($getTableName){
-
+            if ($getTableName) {
+                //delete data from sql
                 try{
-                    $sql = "DELETE FROM $getTableName 
-                                WHERE module_id = :module_id 
+                    $sql = "DELETE FROM $getTableName
+                                WHERE module_id = :module_id
                                 AND component_instance = :instance_id";
                     $stmt = $db->prepare($sql);
                     $stmt->execute([
@@ -250,12 +284,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "Error: " . $e->getMessage();
                 }
             }
-            //header
-            header("Location: ../../modules/index.php");
-        }
+                //get image files that need to be deleted
+                $imgFiles = [];
+                foreach ($componentPassData as $component) {
+                    if (is_array($component)) {
+                        echo $component['component_id'];
+                        if ($component['component_id'] === 2) {
+                            $imgFiles[] = $component['component_data'];
+                        }
 
-    } else{
-      echo  "Unknown action";
-    }
+                    }
+                }
+
+                image::deleteFiles($imgFiles);
+
+
+                //header
+//            header("Location: ../../modules/index.php");
+            }
+
+        } else {
+            echo "Unknown action";
+        }
 
 }

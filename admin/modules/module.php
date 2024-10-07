@@ -12,7 +12,7 @@ class module
     protected $moduleName;
     protected string $tableName;
     protected int $moduleId;
-    private PDO $db;
+    protected PDO $db;
 
     public function __construct($moduleName = null, $tableName = null, $moduleId = null)
     {

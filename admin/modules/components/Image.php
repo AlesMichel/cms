@@ -7,10 +7,7 @@ class Image extends Component
 {
     protected $placeholder = 'Text...';
 
-    public function render(): string
-    {
-        return $this->name;
-    }
+
     public static function getFields(): string
     {
         return "
@@ -24,30 +21,60 @@ class Image extends Component
     }
 
     //ai
-    public static function viewImage($data): string {
-        // Check if the provided data is a valid base64 image string
-        if (strpos($data, 'data:image') === 0) {
-            // The data is already a base64 encoded image
-            $imageSrc = $data;
-        } elseif (is_string($data) && !empty($data)) {
-            // The data could be a LONGBLOB stored as binary, convert to base64
-            // Assuming $data is raw binary data from your LONGBLOB column
-            $imageSrc = 'data:image/png;base64,' . base64_encode($data);
-        } elseif (file_exists($data)) {
-            // The data is a file path (on the server)
-            $imageSrc = $data; // Ensure the file path is accessible from the web (e.g., public folder)
-        } elseif (filter_var($data, FILTER_VALIDATE_URL)) {
-            // The data is a valid URL
-            $imageSrc = $data;
-        } else {
-            // Invalid image data
-            return '<p>Invalid image data.</p>';
-        }
+    public static function viewImage($filename): string {
+        // Create the relative URL for the image
+        $src = '/cms/admin/uploads/' . basename($filename);
 
         // Return the HTML to display the image
-        return '<img src="' . htmlspecialchars($imageSrc) . '" style="max-width:200px;" alt="Image" class="img-thumbnail" />';
+        return '<img src="' . htmlspecialchars($src) . '" style="max-width:100px; min-width:100px;" alt="Image" class="img-thumbnail" />';
+    }
+    public static function deleteFiles(array $files): void
+    {
+        foreach($files as $file){
+            echo $file;
+            if(file_exists($file)){
+                unlink($file);
+            }
+        }
     }
 
+    public function uploadImage($src): array
+    {
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        //uploads image to uploads
+        //first as ChatGPT said explode the tag
+        if($src){
+            $imageData = explode(',', $src)[1];
+            //nice got the path
+            //now decode the image
+            $decodedImage = base64_decode($imageData);
+            $webpFileName = 'C:/xampp/htdocs/cms/admin/uploads/image_' . time() . '.webp';
+//            $webpFileName = ABS_URL. 'C:/xampp/htdocs/cms/admin/uploads/image_' . time() . '.webp';
+            $image = imagecreatefromstring($decodedImage);
+
+            // Convert the image to WebP and save it
+            if (imagewebp($image, $webpFileName)) {
+                echo "Image successfully converted to WebP and saved as $webpFileName";
+                $result['data'] = $webpFileName;
+                $result['success'] = true;
+            } else {
+                $result['error'] = 'Failed to convert and save the image.';
+            }
+
+            // Free up memory
+            imagedestroy($image);
+
+        }else{
+            $result['success'] = false;
+            $result['error'] = "Haven't received the image data";
+        }
+
+        return $result;
+    }
 
     ///ai
     public static function getDataFieldsForEdit($componentId ,$componentName, $componentData): string{
@@ -55,22 +82,18 @@ class Image extends Component
         $out .= "
         <label for='textField_".$componentId."' class='form-label'>" . $componentName ."</label>";
 
-        if($componentData){
-
-//                $out .= "<img id='preview_" . $componentId . "' src='" . $componentData . "' alt='img-field' class='img-thumbnail' />";
-            self::viewImage($componentData);
-
-
-        }else{
-            $out .= ' / Záznam zatím nemá data';
+        if ($componentData) {
+            // Generate the HTML to view the existing image
+            $out .= self::viewImage($componentData); // Assuming viewImage returns the HTML for the image
+        } else {
+            $out .= ' / Záznam zatím nemá data'; // Message if there's no data
         }
+
         $out .= '<img id="imagePreview' . $componentName . '" src="" class="img-thumbnail d-none" />';
-        $out .= '<button class="btn btn-primary opacity-0" id="cropBtn' . $componentName .'">Použít</button>';
+        $out .= '<button class="btn btn-primary mt-3 opacity-0" id="cropBtn' . $componentName .'">Použít</button>';
+        $out .= "<input class='d-none' type='text' id='dataPassImg" . $componentName . "' value='" . $componentData . "' name='component_" . $componentName ."' />";
+        $out .= "<input onchange='handleImageUpload(this,\"".$componentName."\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
 
-        //hidden input for passing data
-        $out .= "<input type='hidden' id='dataPassImg" . $componentName . " ' value='" . $componentData . "' name='component_" . $componentName ."' />";
-
-        $out .= "<input onchange='handleImageUpload(this,\"" . $componentName . "\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
 
 
 

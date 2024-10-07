@@ -5,12 +5,6 @@ use components\Component;
 
 class TextField extends Component
 {
-    protected $placeholder = 'Text...';
-
-    public function render(): string
-    {
-        return $this->name;
-    }
     public static function getFields(): string
     {
         return "
