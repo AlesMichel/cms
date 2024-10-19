@@ -7,90 +7,109 @@ use components\Image\Image;
 session_start();
 
 
-require_once(__DIR__."/../module.php");
-require_once(__DIR__."/ComponentsFetch.php");
-require_once(__DIR__."/../../DbConnect/connect.php");
-require_once(__DIR__."/../../config.php");
+require_once(__DIR__ . "/../module.php");
+require_once(__DIR__ . "/ComponentsFetch.php");
+require_once(__DIR__ . "/../../DbConnect/connect.php");
+require_once(__DIR__ . "/../../config.php");
 
-$component = new Component(null,null,39);
+
 $db = \cms\DbConnect\connect::getInstance()->getConnection();
-
+$proceed = true;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //determine if i am creating, updating or deleting
     $action = $_POST["action"] ?? null;
     $moduleId = $_SESSION["current_module_id"] ?? null;
     $module = new Module(null, null, $moduleId);
+    $component = new Component(null, null, $moduleId);
+
 
     if ($action == "create" && $moduleId != null) {
         $componentData = $_POST["component_data"] ?? '';
 
-            $componentName = $_POST["component_name"];
-            $componentId = $_SESSION["component_id"];
+        $componentName = $_POST["component_name"];
+        $componentId = $_SESSION["component_id"];
+        $getTableName = $module->getTableName();
 
-            $getTableName = $module->getTableName();
-
-            //fetch all instances
-            $componentInstancesFetch = $component->getAllCurrentComponentInstances();
-            if($componentInstancesFetch['success'] = true){
+        //fetch all instances
+        $componentInstancesFetch = $component->getAllCurrentComponentInstances();
+        if ($componentInstancesFetch['success'] = true) {
             $componentInstancesAll = $componentInstancesFetch['data'];
-            if($componentInstancesAll == null){
-
-                //now get unique instances
-                $componentInstancesArray= array_column($componentInstancesAll, 'component_instance');
-                $componentInstancesUnique = array_unique($componentInstancesArray);
-
-            }
-
-                //this is the firs component in current module
 
 
-                //sql for batch
-                if($getTableName){
 
-                    $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_data, component_name) 
-                    VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
-                            try {
-                                $stmt = $db->prepare($sql);
-                                $stmt->execute([
-                                    ':module_id' => $moduleId,
-                                    ':component_id' => $componentId,
-                                    ':instance_id' => 0,
-                                    ':component_data' => $componentData,
-                                    ':component_name' => $componentName
-                                ]);
-                            }catch(PDOException $e){
-                                echo "Error: " . $e->getMessage();
-                            }
-
-                    header("Location: ../../modules/index.php");
-                }
-            }
-
-            //sql for batch
-            if($getTableName){
             $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_data, component_name) 
                     VALUES (:module_id, :component_id, :instance_id, :component_data, :component_name)";
-            if(!empty($componentInstancesUnique)){
-                foreach($componentInstancesUnique as $componentInstance){
 
-                    try {
+
+            if ($componentInstancesAll == null) {
+                //create first component in curr module
+                try {
                     $stmt = $db->prepare($sql);
                     $stmt->execute([
                         ':module_id' => $moduleId,
                         ':component_id' => $componentId,
-                        ':instance_id' => $componentInstance,
+                        ':instance_id' => 0,
                         ':component_data' => $componentData,
                         ':component_name' => $componentName
                     ]);
-                }catch(PDOException $e){
+                } catch (PDOException $e) {
                     echo "Error: " . $e->getMessage();
                 }
+            } else {
 
+                //ensure that the name is not being already used
+
+                $componentNamesFetch = $component->getAllCurrentComponentNames();
+                if($componentNamesFetch['success'] = true){
+                    foreach ($componentNamesFetch['data'] as $componentNameFetch) {
+                        echo $componentNameFetch['component_name'];
+                        if($componentNameFetch['component_name'] === $componentName){
+                            $_SESSION['cms_message_error'] = 'Komponent se stejným název už existuje';
+                            header("Location: ../../modules/index.php");
+                            $proceed = false;
+                        }
+                    }
+                }else{
+                    //session error
+                    //echo temp
+                    echo $componentNamesFetch['error'];
                 }
-            }
+
+
+
+                //module has components
+                //get unique instances
+                $componentInstancesArray = array_column($componentInstancesAll, 'component_instance');
+                $componentInstancesUnique = array_unique($componentInstancesArray);
+
+
+
+                if (!empty($componentInstancesUnique && $proceed === true)) {
+                    foreach ($componentInstancesUnique as $componentInstance) {
+
+                        try {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute([
+                                ':module_id' => $moduleId,
+                                ':component_id' => $componentId,
+                                ':instance_id' => $componentInstance,
+                                ':component_data' => $componentData,
+                                ':component_name' => $componentName
+                            ]);
+                        } catch (PDOException $e) {
+                            echo "Error: " . $e->getMessage();
+                        }
+
+                    }
+                }
 
             }
-            header("Location: ../../modules/index.php");
+
+        }
+
+
+//
+        header("Location: ../../modules/index.php");
 
 
     } else if ($action == "delete") {
@@ -99,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $componentName = $componentPassData['component_name'];
         $moduleId = $componentPassData["module_id"];
         $getTableName = $module->getTableName();
-        if($getTableName){
+        if ($getTableName) {
             try {
                 $sql = "DELETE FROM $getTableName
                 WHERE module_id = :module_id
@@ -119,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-    //inserting data
+        //inserting data
     } else if ($action == "insertData") {
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
@@ -139,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $componentName = $component[1]; // Second element: component Name
                             $componentData = $_POST['component_' . $componentName] ?? null;// get value
 
-                            if($componentId === 2){
+                            if ($componentId === 2) {
                                 $image = new \components\Image\Image(null, null, $moduleId);
                                 $res = $image->uploadImage($componentData);
                                 $componentData = $res['data'];
@@ -182,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         header("Location: ../../modules/index.php");
-    }else if($action == "updateData"){
+    } else if ($action == "updateData") {
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
 //        var_dump($_SESSION['component_pass_data']);
@@ -208,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
 //                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
 
-                            if($componentId === 2){
+                            if ($componentId === 2) {
                                 $image = new \components\Image\Image(null, null, $moduleId);
                                 $res = $image->uploadImage($componentData);
                                 var_dump($res);
@@ -255,7 +274,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
 
-    }else if($action == 'deleteData') {
+    } else if ($action == 'deleteData') {
 
 
         if (isset($_SESSION['component_pass_data'])) {
@@ -270,7 +289,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $getTableName = $module->getTableName();
             if ($getTableName) {
                 //delete data from sql
-                try{
+                try {
                     $sql = "DELETE FROM $getTableName
                                 WHERE module_id = :module_id
                                 AND component_instance = :instance_id";
@@ -280,31 +299,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         ':instance_id' => $instance,
                     ]);
 
-                }catch (PDOException $e) {
+                } catch (PDOException $e) {
                     echo "Error: " . $e->getMessage();
                 }
             }
-                //get image files that need to be deleted
-                $imgFiles = [];
-                foreach ($componentPassData as $component) {
-                    if (is_array($component)) {
-                        echo $component['component_id'];
-                        if ($component['component_id'] === 2) {
-                            $imgFiles[] = $component['component_data'];
-                        }
-
+            //get image files that need to be deleted
+            $imgFiles = [];
+            foreach ($componentPassData as $component) {
+                if (is_array($component)) {
+                    echo $component['component_id'];
+                    if ($component['component_id'] === 2) {
+                        $imgFiles[] = $component['component_data'];
                     }
+
                 }
-
-                image::deleteFiles($imgFiles);
-
-
-                //header
-//            header("Location: ../../modules/index.php");
             }
 
-        } else {
-            echo "Unknown action";
+            image::deleteFiles($imgFiles);
+
+
+            //header
+//            header("Location: ../../modules/index.php");
         }
+
+    } else {
+        echo "Unknown action";
+    }
 
 }

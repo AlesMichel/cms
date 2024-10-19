@@ -83,6 +83,32 @@ class Component extends module {
         return $result;
     }
 
+    public function getAllCurrentComponentNames():array{
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        $instances = [];
+        try{
+            $sql = "SELECT component_name FROM " . $this->getTableName() . " WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(["module_id" => $this->getID()]);
+            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if($instances){
+                $result["success"] = true;
+                $result["data"] = $instances;
+            }else{
+                $result["error"] = 'Failed to fetch current instances instances';
+            }
+
+        }catch (PDOException $e) {
+            $result['error'] = "Error fetching module data: " . $e->getMessage();
+        }
+        return $result;
+    }
+
     public static function getLastInstance(int $moduleId, PDO $db){
         $getModuleTable = module::findModuleTableById($moduleId, $db);
         try {

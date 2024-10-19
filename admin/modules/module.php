@@ -8,7 +8,6 @@ use PDOException;
 
 class module
 {
-
     protected $moduleName;
     protected string $tableName;
     protected int $moduleId;
@@ -20,10 +19,10 @@ class module
         $this->db = \cms\DbConnect\connect::getInstance()->getConnection();
         //get module name
         switch (true) {
+
             // Case: Only moduleId is provided
             case ($moduleId !== null):
                 $this->moduleId = $moduleId;
-
                 // Fetch module name and table name based on ID
                 $status = $this->getNameViaId();
                 if ($status['success']) {
@@ -107,7 +106,7 @@ class module
                 $result['success'] = true;
             }
         } catch (PDOException $e) {
-            $result['error'] = "Error fetching module data: " . $e->getMessage();
+            $result['error'] = "Error fetching table name: " . $e->getMessage();
         }
         return $result;
     }
@@ -143,11 +142,11 @@ class module
             'error' => null,
         ];
         try {
-            $sql = "SELECT module_name FROM `modules` WHERE id= :id  ";
+            $sql = "SELECT module_name FROM `modules` WHERE id= :id ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id' => $this->moduleId]);
             $getName = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!empty($getName)) {
+            if ($getName) {
                 $result['data'] = $getName['module_name'];
                 $result['success'] = true;
             } else {
