@@ -29,29 +29,7 @@ class Component extends module {
         }
         return '';
     }
-    public static function editComponentData($id ,$moduleId, $componentId, $instance, $newData, $db)
-    {
-        $getModuleTable = module::findModuleTableById($moduleId, $db);
-        try {
-            $sql = "UPDATE $getModuleTable
-                SET component_data = :new_data 
-                WHERE id = :id
-                  AND module_id = :module_id 
-                  AND component_instance = :instance 
-                  AND component_id = :component_id";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                "id" => $id,
-                "new_data" => $newData,
-                "module_id" => $moduleId,
-                "instance" => $instance,
-                "component_id" => $componentId
-            ]);
-            echo "Data updated successfully.";
-        } catch (PDOException $e) {
-            echo "Data not updated: " . $e->getMessage();
-        }
-    }
+
 
     /**
      * Method for getting all current instances for current module
@@ -108,6 +86,35 @@ class Component extends module {
         }
         return $result;
     }
+
+    public function getHighestInstance(){
+        $getModuleTable = parent::getTableName();
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        try{
+            $sql = "SELECT MAX(component_instance) AS highest_instance 
+                FROM $getModuleTable 
+                WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if($row['highest_instance']){
+                $result["success"] = true;
+                $result["data"] = $row['highest_instance'];
+            }
+
+        }catch (PDOException $e) {
+            $result["success"] = false;
+            $result["error"] = "Error fetching module data: " . $e->getMessage();
+        }
+    return $result;
+    }
+
 
     public static function getLastInstance(int $moduleId, PDO $db){
         $getModuleTable = module::findModuleTableById($moduleId, $db);

@@ -3,9 +3,11 @@
 namespace components\ComponentsFetch;
 require_once(__DIR__."/TextField.php");
 require_once(__DIR__."/Image.php");
+require_once(__DIR__."/Position.php");
 
 use components\Image\Image;
 use components\TextField\TextField;
+use components\Position\Position;
 use PDO;
 use PDOException;
 
@@ -60,7 +62,7 @@ class ComponentsFetch {
         }elseif($componentId == 2) {
             $out .= Image::getFields();
         } elseif($componentId == 3) {
-            $out .= 'Position';
+            $out .= Position::getFields();
         }
 
         return $out;
@@ -138,6 +140,8 @@ class ComponentsFetch {
         }elseif ($componentType == 'image'){
 //            $out .= Image::viewImage($componentData);
             $out .= Image::getDataFieldsForEdit($componentId,$componentName, $componentData);
+        }elseif($componentType = 'position'){
+            $out .= Position::getDataFieldsForEdit($componentName,$componentData);
         }
         else{
             $out .= 'No data fields found';

@@ -28,6 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $componentName = $_POST["component_name"];
         $componentId = $_SESSION["component_id"];
+        $componentIsRequired = $_POST["component_isRequired"] ?? false;
+        $componentIsMultilang = $_POST["component_isMultilang"] ?? false;
+
+        echo $componentIsMultilang . $componentIsRequired;
+
         $getTableName = $module->getTableName();
 
         //fetch all instances
@@ -75,14 +80,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo $componentNamesFetch['error'];
                 }
 
-
-
                 //module has components
                 //get unique instances
                 $componentInstancesArray = array_column($componentInstancesAll, 'component_instance');
                 $componentInstancesUnique = array_unique($componentInstancesArray);
-
-
 
                 if (!empty($componentInstancesUnique && $proceed === true)) {
                     foreach ($componentInstancesUnique as $componentInstance) {
@@ -106,10 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
         }
-
-
-//
-        header("Location: ../../modules/index.php");
+//        header("Location: ../../modules/index.php");
 
 
     } else if ($action == "delete") {
@@ -314,12 +312,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 }
             }
-
             image::deleteFiles($imgFiles);
 
 
             //header
-//            header("Location: ../../modules/index.php");
+           header("Location: ../../modules/index.php");
         }
 
     } else {

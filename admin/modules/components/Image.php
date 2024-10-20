@@ -80,17 +80,19 @@ class Image extends Component
     public static function getDataFieldsForEdit($componentId ,$componentName, $componentData): string{
         $out = '';
         $out .= "
-        <label for='textField_".$componentId."' class='form-label'>" . $componentName ."</label>";
+        <label for='image".$componentName."' class='form-label'>" . $componentName ."</label>";
 
         if ($componentData) {
-            // Generate the HTML to view the existing image
-            $out .= self::viewImage($componentData); // Assuming viewImage returns the HTML for the image
+
+            $out .='<p>';
+            $out .= self::viewImage($componentData);
+            $out .='</p>';
         } else {
             $out .= ' / Záznam zatím nemá data'; // Message if there's no data
         }
 
         $out .= '<img id="imagePreview' . $componentName . '" src="" class="img-thumbnail d-none" />';
-        $out .= '<button class="btn btn-primary mt-3 opacity-0" id="cropBtn' . $componentName .'">Použít</button>';
+        $out .= '<button class="btn btn-primary mt-3 d-none" id="cropBtn' . $componentName .'">Použít</button>';
         $out .= "<input class='d-none' type='text' id='dataPassImg" . $componentName . "' value='" . $componentData . "' name='component_" . $componentName ."' />";
         $out .= "<input onchange='handleImageUpload(this,\"".$componentName."\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
 

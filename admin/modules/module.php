@@ -8,7 +8,7 @@ use PDOException;
 
 class module
 {
-    protected $moduleName;
+    protected string $moduleName;
     protected string $tableName;
     protected int $moduleId;
     protected PDO $db;
@@ -21,7 +21,7 @@ class module
         switch (true) {
 
             // Case: Only moduleId is provided
-            case ($moduleId !== null):
+            case ($moduleName === null && $tableName === null && $moduleId !== null):
                 $this->moduleId = $moduleId;
                 // Fetch module name and table name based on ID
                 $status = $this->getNameViaId();
@@ -39,7 +39,7 @@ class module
                 break;
 
             // Case: Module name is provided (with or without table name)
-            case ($moduleName !== null):
+            case ($moduleName !== null && $tableName === null && $moduleId === null):
                 $this->moduleName = $moduleName;
                 $status = $this->getIDViaName();
                 if ($status['success']) {
@@ -47,18 +47,33 @@ class module
                 }else{
                     echo $status['error'];
                 }
-
-                // Use provided table name if available, otherwise fetch it
-                if ($tableName !== null) {
-                    $this->tableName = $tableName;
-                } else {
-                    $status = $this->getTableViaName();
+                $status = $this->getTableViaName();
                     if ($status['success']) {
                         $this->tableName = $status['data'];
                     } else {
                         echo $status['error'];
                     }
+                break;
+
+            case($moduleName !== null && $tableName !== null):
+
+                $this->moduleName = $moduleName;
+                $this->tableName = $tableName;
+
+                //insert table
+
+                $res = $this->createNewModule();
+                if($res['success'] === true){
+                    $_SESSION['cms_message'] = 'New module has been created';
+                    $idRes = $this->getIDViaName();
+
+                    if($idRes['success'] === true){
+                        $this->moduleId = $idRes['data'];
+                    }
+                }else{
+                    $_SESSION['cms_message_error'] = $res['error'];
                 }
+
                 break;
 
             // Case: Neither moduleId nor moduleName is provided
@@ -160,67 +175,140 @@ class module
     #endregion getters
 
     //processes
-    public function addModuleToModules(): bool
-    {
-        $moduleNameAlreadyExists = false;
-        try {
+
+    private function createNewModule():array{
+        $result = [
+            'success' => false,
+            'error' => null,
+        ];
+
+        $moduleTableIsUnique = $this->tableNameIsUnique();
+        $moduleNameIsUnique = $this->moduleNameIsUnique();
+
+        if($moduleTableIsUnique['success'] === true && $moduleNameIsUnique['success'] === true){
+
+            $insertName = $this->addModuleToCommonTable();
+            $insertTable = $this->addModuleToDB();
+
+            if($insertTable['success'] === true && $insertName['success'] === true){
+                $result['success'] = true;
+            }else{
+                $result['error'] = $insertName['error'] . $insertTable['error'];
+            }
+
+        }else{
+            $result['error'] = $moduleTableIsUnique['error'] . ' ' . $moduleNameIsUnique['error'];
+
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     * Check if table name is not being already in use
+     */
+    private function moduleNameIsUnique(): array{
+        $result = [
+            'success' => false,
+            'error' => null,
+        ];
+        try{
             $queryCheck = $this->db->prepare("SELECT * FROM `modules` WHERE `module_name` = :name");
             $queryCheck->bindParam(":name", $this->moduleName);
             $queryCheck->execute();
-
-            $result = $queryCheck->fetch(PDO::FETCH_ASSOC);
-
-            if ($result) {
-                echo "Module already exists.";
-                return false;
+            $check =$queryCheck->fetch(PDO::FETCH_ASSOC);
+            if($check) {
+                $result['error'] = 'Module with this name already exists';
+            }else{
+                $result['success'] = true;
             }
-
-            //module name does not exit so we proceed to inserting module name into database
-            $sql = "INSERT INTO `modules` (module_name, module_table) VALUES (:moduleName, :moduleTableName)";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':moduleName' => $this->moduleName, ':moduleTableName' => $this->tableName]);
-
-
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            exit();
+        }catch (PDOException $e) {
+            $result['error'] = $e->getMessage();
         }
-        return true;
+        return $result;
     }
-    public function addModuleToDB(): bool
-    {
 
-        //first check if the table is not already in the database
+    /**
+     * @return array
+     * Check if module name is not already in use
+     */
+    private function tableNameIsUnique(): array{
+
+        $result = [
+            'success' => false,
+            'error' => null,
+        ];
+
         try {
             $queryCheck = $this->db->prepare("SHOW TABLES LIKE :tableName");
             $queryCheck->execute([':tableName' => $this->tableName]);
-            $tableExists = $queryCheck->fetch();
-            if ($tableExists) {
-                //table exists
-                echo "Table already exists";
-                return false;
-            } else {
+            $check= $queryCheck->fetch(PDO::FETCH_ASSOC);
+            if ($check) {
+                echo $this->moduleName;
+                $result['error'] = "Module with this table name already exists.";
+            }else{
+                $result['success'] = true;
+            }
+        }catch (PDOException $e) {
+            $result['error'] = $e->getMessage();
+        }
+        return $result;
+    }
+
+
+    private function addModuleToCommonTable(): array
+    {
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        try {
+
+            //module name does not exist, so we proceed to inserting module name into database
+                $sql = "INSERT INTO `modules` (module_name, module_table) VALUES (:moduleName, :moduleTableName)";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([':moduleName' => $this->moduleName, ':moduleTableName' => $this->tableName]);
+                $result['success'] = true;
+
+        } catch (PDOException $e) {
+            $result['error'] = $e->getMessage();
+        }
+       return $result;
+    }
+    private function addModuleToDB(): array
+    {
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        //first check if the table is not already in the database
+        try {
+
                 //table does not exist, proceed to creating new table
                 //create id, columns for components
                 $sql = "CREATE TABLE IF NOT EXISTS `$this->tableName` (
-                        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                        module_id INT(11) UNSIGNED,
-                        component_id INT(11) UNSIGNED,
-                        component_instance INT(11),
-                        component_name VARCHAR(255),
-                        component_data LONGBLOB,
-                        FOREIGN KEY (module_id) REFERENCES modules(id) ON
-                            DELETE CASCADE, 
-                        FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE
-                        ) ENGINE=INNODB;";
+                id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                module_id INT(11) UNSIGNED,
+                component_id INT(11) UNSIGNED,
+                component_instance INT(11),
+                component_name VARCHAR(255),
+                component_data LONGBLOB,
+                component_data_en LONGBLOB,
+                component_multlang TINYINT(1),
+                component_required TINYINT(1),
+                FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
+                ) ENGINE=INNODB;";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute();
-            }
+                $result['success'] = true;
+                $result['error'] = '';
+
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            exit();
+            $result['error'] = $e->getMessage();
         }
-        return true;
+        return $result;
     }
 
     public function deleteModule()
