@@ -14,7 +14,6 @@ if(isset($_POST['login'])){
            Špatné uživatelské jméno nebo heslo.
         </div>';
     }
-
 }
 ?>
 

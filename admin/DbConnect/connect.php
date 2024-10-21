@@ -5,16 +5,19 @@ namespace cms\DbConnect;
 use PDO;
 use PDOException;
 
+
+require_once __DIR__ . "/../config.php";
+require_once ABS_PATH . "/config.php";
+
 class connect{
     private static $instance = null;
     private PDO $connection;
 
     private function __construct(){
-        $dbHost = "127.0.0.1";
-        $dbUser = "root";
-        $dbPassword = "alesm";
-        $dbName = "cms";
-
+        $dbHost = DBHOST;
+        $dbUser = DBUSER;
+        $dbPassword = DBPASS;
+        $dbName = DBNAME;
 
         try {
 
@@ -38,10 +41,6 @@ class connect{
     public function getConnection() {
         return $this->connection;
     }
-
-
-
-
 }
 
 ?>

@@ -220,10 +220,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $componentName = $component[1]; // Second element: component Name
                             $componentData = $_POST['component_' . $componentName] ?? null;
                             $getTableName = $module->getTableName();
-                            // get value of field
-//                            echo "Component ID: " . htmlspecialchars($componentId) . "<br>";
-//                            echo "Component Name: " . htmlspecialchars($componentName) . "<br>";
-//                            echo "Input Value: " . htmlspecialchars($componentData) . "<br>";
 
                             if ($componentId === 2) {
                                 $image = new \components\Image\Image(null, null, $moduleId);

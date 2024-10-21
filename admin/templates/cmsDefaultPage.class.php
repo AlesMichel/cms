@@ -74,7 +74,7 @@ class cmsDefaultPage {
     }
     public function buildLayout(){
         echo '<!doctype html>
-              <html lang="en" data-bs-theme="dark">';
+              <html data-bs-theme="dark" lang="en">';
         echo $this->buildHead();
         echo $this->getAlerts();
         echo $this->buildNavbar();
