@@ -1,11 +1,12 @@
 <?php
 require_once('config.php');
 
+
 if(isset($_POST['login'])){
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    if($username == LOGIN && $password == PASSWORD){
+    if($username == LOGIN && $password == PASS){
         session_start();
         $_SESSION["user"] = "admin";
         header("Location:modules/index.php");

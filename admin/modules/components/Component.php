@@ -7,137 +7,120 @@ use PDO;
 use PDOException;
 
 class Component extends module {
-    protected $name;
-    protected $type;
+
 
     public function __construct($moduleName = null, $tableName = null, $moduleId = null) {
         parent::__construct($moduleName, $tableName, $moduleId);
     }
 
-    public static function getComponentById($id, $db)
+    /**
+     * @param $componentName
+     * @param $componentId
+     * @param $componentIsRequired
+     * @param $componentIsMultlang
+     * @return array
+     * init new component
+     */
+    public function initNewComponent($componentName, $componentId, $componentIsRequired, $componentIsMultlang): array
     {
-        try {
-            $sql = "SELECT * FROM components WHERE id = :id";
-            $stmt = $db->prepare($sql);
-            $stmt->execute(["id" => $id]);
-            $fetchComponent = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($fetchComponent) {
-                return $fetchComponent;
-            }
-        } catch (PDOException $e) {
-            echo "Component not found, Error: " . $e->getMessage();
-        }
-        return '';
-    }
 
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        //var
+        $getModuleId = $this->getID();
+        $getTableName = $this->getTableName();
+        $proceed = true;
+
+        //fetch all instances
+        $componentInstancesFetch = $this->getAllCurrentComponentInstances();
+        if ($componentInstancesFetch['success'] === true) {
+            $componentInstancesAll = $componentInstancesFetch['data'];
+
+            $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_name, component_required, component_multlang) 
+                    VALUES (:module_id, :component_id, :instance_id, :component_name, :component_required, :component_multlang)";
+            if ($componentInstancesAll == null) {
+                //create first component in curr module
+                try {
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([
+                        ':module_id' => $getModuleId,
+                        ':component_id' => $componentId,
+                        ':instance_id' => 0,
+                        ':component_name' => $componentName,
+                        ':component_required' => $componentIsRequired,
+                        ':component_multlang' => $componentIsMultlang
+                    ]);
+
+                } catch (PDOException $e) {
+                    $result['error'] = $e->getMessage();
+                }
+            } else {
+                //ensure that the name is not being already used
+                $componentNamesFetch = $this->getAllCurrentComponentNames();
+                if($componentNamesFetch['success'] === true){
+                    foreach ($componentNamesFetch['data'] as $componentNameFetch) {
+                        echo $componentNameFetch['component_name'];
+                        if($componentNameFetch['component_name'] === $componentName){
+                            $_SESSION['cms_message_error'] = 'Komponent se stejným název už existuje';
+                            $proceed = false;
+                        }
+                    }
+                }else{
+                    //session error
+                    //echo temp
+                    $result['error'] .= $componentNamesFetch['error'];
+                }
+                //module has components
+                //get unique instances
+                $componentInstancesArray = array_column($componentInstancesAll, 'component_instance');
+                $componentInstancesUnique = array_unique($componentInstancesArray);
+
+                if (!empty($componentInstancesUnique && $result['error'] == null && $proceed == true)) {
+                    foreach ($componentInstancesUnique as $componentInstance) {
+
+                        try {
+                            $stmt = $this->db->prepare($sql);
+                            $stmt->execute([
+                                ':module_id' => $getModuleId,
+                                ':component_id' => $componentId,
+                                ':instance_id' => $componentInstance,
+                                ':component_name' => $componentName,
+                                ':component_multlang' => $componentIsMultlang,
+                                ':component_required' => $componentIsRequired
+                            ]);
+                        } catch (PDOException $e) {
+                            $result['error'] .= $e->getMessage();
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+        return $result;
+    }
 
     /**
-     * Method for getting all current instances for current module
+     * @param $data
+     * @return void
+     */
+    public function insertDataIntoComponent($data){
+        foreach ($data as $component){
+           $componentName = $component['componentName'];
+           $componentId = $component['componentId'];
+           $componentIsRequired = $component['componentIsRequired'];
+           $componentIsMultlang = $component['componentIsMultlang'];
+        }
+    }
+
+    /**
+     * Method for getting all current names for current module
      * @return array
      */
-    public function getAllCurrentComponentInstances():array{
-        $result = [
-            'success' => false,
-            'data' => null,
-            'error' => null,
-        ];
-        $instances = [];
-        try{
-            $sql = "SELECT component_instance FROM " . $this->getTableName() . " WHERE module_id = :module_id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(["module_id" => $this->getID()]);
-            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if($instances){
-                $result["success"] = true;
-                $result["data"] = $instances;
-            }else{
-                $result["error"] = 'Failed to fetch current instances instances';
-            }
-
-        }catch (PDOException $e) {
-            $result['error'] = "Error fetching module data: " . $e->getMessage();
-        }
-        return $result;
-    }
-
-    public function getAllCurrentComponentNames():array{
-        $result = [
-            'success' => false,
-            'data' => null,
-            'error' => null,
-        ];
-        $instances = [];
-        try{
-            $sql = "SELECT component_name FROM " . $this->getTableName() . " WHERE module_id = :module_id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(["module_id" => $this->getID()]);
-            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if($instances){
-                $result["success"] = true;
-                $result["data"] = $instances;
-            }else{
-                $result["error"] = 'Failed to fetch current instances instances';
-            }
-
-        }catch (PDOException $e) {
-            $result['error'] = "Error fetching module data: " . $e->getMessage();
-        }
-        return $result;
-    }
-
-    public function getHighestInstance(){
-        $getModuleTable = parent::getTableName();
-        $result = [
-            'success' => false,
-            'data' => null,
-            'error' => null,
-        ];
-        try{
-            $sql = "SELECT MAX(component_instance) AS highest_instance 
-                FROM $getModuleTable 
-                WHERE module_id = :module_id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if($row['highest_instance']){
-                $result["success"] = true;
-                $result["data"] = $row['highest_instance'];
-            }
-
-        }catch (PDOException $e) {
-            $result["success"] = false;
-            $result["error"] = "Error fetching module data: " . $e->getMessage();
-        }
-    return $result;
-    }
-
-
-    public static function getLastInstance(int $moduleId, PDO $db){
-        $getModuleTable = module::findModuleTableById($moduleId, $db);
-        try {
-            // Using sql max find last instance
-            $sql = "SELECT MAX(component_instance) AS last_instance 
-                FROM $getModuleTable 
-                WHERE module_id = :module_id";
-
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
-            $stmt->execute();
-
-            // Fetch the result
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // Return the highest instance or 0 if none is found
-            return $row['last_instance'] ?? 1;
-
-        }catch (PDOException $e) {
-            echo "Error fetching module data: " . $e->getMessage();
-            return null;
-        }
-    }
 
 }

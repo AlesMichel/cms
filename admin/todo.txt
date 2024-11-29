@@ -31,3 +31,6 @@ if update data tak updatetnout jenom ty data, kde jsem upravil???
 
 
 1. jak udelat set componentu a jejich vlastnosti
+
+componenta - class
+component classsa bude prijimat create data params, get current data parrams, insert for rows, delete via params data, delete via instance

@@ -14,7 +14,6 @@ require_once("./components/Image.php");
 
 $out = '';
 $moduleName = $_GET["module_name"];
-
 $module = new module($moduleName);
 $moduleId = $module->getID();
 
@@ -49,10 +48,12 @@ if ($moduleComponentsStatus['success']) {
                 'id' => $component['id'],
                 'module_id' => $moduleId,
                 'component_id' => $component['component_id'],
-                'instance' => $instance,
-                'component_data' => $component['component_data'],
-                'component_name' => $component['component_name']
+                'component_instance' => $instance,
+                'component_name' => $component['component_name'],
+                'component_multlang' => $component['component_multlang'],
+                'component_required' => $component['component_required']
             ];
+
             // Form with hidden fields to pass component data
             $out .= "<td class='d-flex'>";
             $out .= "<form method='POST' action='./components/edit.php'>";

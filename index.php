@@ -27,7 +27,8 @@ $moduleId = $module->getID();
 if ($moduleName) {
     // Get module ID by its name
     $moduleComponents = $module->getModuleData();
-    $highestInstance = component::getLastInstance($moduleId, $db);
+//    $highestInstance = component::getLastInstance($moduleId, $db);
+    $highestInstance = $module->getHighestInstance()['data'];
 
     // Check if any components are found for this module
     if (empty($moduleComponents)) {

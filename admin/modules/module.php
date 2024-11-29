@@ -448,8 +448,10 @@ class module
                     $id = $row['id'];
                     $instance = $row['component_instance'];
                     $componentId = $row['component_id'];
-                    $componentData = $row['component_data'];
                     $componentName = $row['component_name'];
+                    $componentIsMultlang = $row['component_multlang'];
+                    $componentIsRequired = $row['component_required'];
+
 
                     // Store the component data, indexed by the instance number
                     if (!isset($moduleComponents[$instance])) {
@@ -459,8 +461,9 @@ class module
                     $moduleComponents[$instance][] = [
                         'id' => $id,
                         'component_id' => $componentId,
-                        'component_data' => $componentData,
-                        'component_name' => $componentName
+                        'component_name' => $componentName,
+                        'component_multlang' => $componentIsMultlang,
+                        'component_required' => $componentIsRequired
                     ];
                 }
                 // Return the organized data
@@ -529,6 +532,57 @@ class module
             return "Module table not found";
 
         }
+    }
+    public function getAllCurrentComponentInstances():array{
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        $instances = [];
+        try{
+            $sql = "SELECT component_instance FROM " . $this->getTableName() . " WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(["module_id" => $this->getID()]);
+            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if($instances){
+                $result["success"] = true;
+                $result["data"] = $instances;
+            }else{
+                $result["error"] = 'Failed to fetch current instances instances';
+            }
+
+        }catch (PDOException $e) {
+            $result['error'] = "Error fetching module data: " . $e->getMessage();
+        }
+        return $result;
+    }
+    public function getHighestInstance(){
+        $getModuleTable = $this->getTableName();
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        try{
+            $sql = "SELECT MAX(component_instance) AS highest_instance 
+                FROM $getModuleTable WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if($row['highest_instance']){
+                $result["success"] = true;
+                $result["data"] = $row['highest_instance'];
+            }
+
+        }catch (PDOException $e) {
+            $result["success"] = false;
+            $result["error"] = "Error fetching module data: " . $e->getMessage();
+        }
+        return $result;
     }
 
 }

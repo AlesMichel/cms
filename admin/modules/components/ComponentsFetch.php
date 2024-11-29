@@ -5,13 +5,20 @@ require_once(__DIR__."/TextField.php");
 require_once(__DIR__."/Image.php");
 require_once(__DIR__."/Position.php");
 
+use components\Component;
 use components\Image\Image;
 use components\TextField\TextField;
 use components\Position\Position;
 use PDO;
 use PDOException;
 
-class ComponentsFetch {
+class ComponentsFetch extends Component {
+
+    public function __construct($moduleName = null, $tableName = null, $moduleId = null) {
+        parent::__construct($moduleName, $tableName, $moduleId);
+    }
+
+
 
     public static function fetchAllComponents($db) {
         try {
@@ -74,7 +81,6 @@ class ComponentsFetch {
                     <td>Název komponenty</td>
                     <td>'. $componentName .'</td>
                 </tr>
-                
                 <tr>
                     <td>Typ komponenty</td>
                     <td>'. $componentType .'</td>
@@ -101,20 +107,26 @@ class ComponentsFetch {
             echo "Error: " . $e->getMessage();
         }
     }
+    public function getComponentFields($insertArray): string
+    {
+        $out = '';
+        foreach($insertArray as $component){
+            $getComponentName = $component['component_name'];
+            $getComponentId = $component['component_id'];
+            $getComponentIsRequired = $component['component_required'];
+            $getComponentIsMultlang = $component['component_multlang'];
 
-    public static function createNewComponent($componentId, $currentModule, $db){
-       $componentType = self::findComponentTypeById($componentId, $db);
-       $out = '';
-       if($componentType == 'text'){
-         $out .= TextField::getFields();
-       }elseif($componentType == 'image'){
-           $out .= Image::getFields();
-       }
-       else{
-           $out .= 'No fields found';
-       }
-       return $out;
+            echo $getComponentId;
+            if($getComponentId == 1){
+                $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
+                $out .= $textField->getDataFieldsForInsert();
+            }else{
+                $out .= 'No data fields found';
+            }
+        }
+        return $out;
     }
+
 
     public static function insertComponentData($componentId, $componentName, $db): string
     {
@@ -129,6 +141,10 @@ class ComponentsFetch {
             $out .= 'No data fields found';
         }
         return $out;
+    }
+
+    public static function insertComponentDataFromArray(array $components, $db ){
+
     }
 
     public static function editComponentData($componentId, $componentName, $componentData, $db): string
@@ -147,6 +163,32 @@ class ComponentsFetch {
             $out .= 'No data fields found';
         }
         return $out;
+    }
+
+    public function getAllCurrentComponentNames():array{
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        $instances = [];
+        try{
+            $sql = "SELECT component_name FROM " . $this->getTableName() . " WHERE module_id = :module_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(["module_id" => $this->getID()]);
+            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if($instances){
+                $result["success"] = true;
+                $result["data"] = $instances;
+            }else{
+                $result["error"] = 'Failed to fetch current instances instances';
+            }
+
+        }catch (PDOException $e) {
+            $result['error'] = "Error fetching module data: " . $e->getMessage();
+        }
+        return $result;
     }
 
 }
