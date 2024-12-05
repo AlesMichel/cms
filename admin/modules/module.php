@@ -552,6 +552,7 @@ class module
                     $result["success"] = true;
                     $result["data"] = $instances;
                 }else{
+                    $result["success"] = true;
                     $result["data"] = -1;
                 }
 
