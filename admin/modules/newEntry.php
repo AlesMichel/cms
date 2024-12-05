@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         var_dump($moduleComponents);
         $out .= "<form action='components/process.php' method='post'>";
         // Loop through each component and process
-        $componentFetch->getComponentFields($moduleComponents);
+//        $componentFetch->getComponentFields($moduleComponents);
         echo $componentFetch->getComponentFields($moduleComponents);
         foreach ($moduleComponents as $component) {
             $componentId = $component['component_id'];

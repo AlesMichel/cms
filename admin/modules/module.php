@@ -546,12 +546,14 @@ class module
             $stmt->execute(["module_id" => $this->getID()]);
             $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if($instances){
-                $result["success"] = true;
-                $result["data"] = $instances;
-            }else{
-                $result["error"] = 'Failed to fetch current instances instances';
-            }
+
+
+                if($instances){
+                    $result["success"] = true;
+                    $result["data"] = $instances;
+                }else{
+                    $result["data"] = -1;
+                }
 
         }catch (PDOException $e) {
             $result['error'] = "Error fetching module data: " . $e->getMessage();

@@ -17,7 +17,7 @@ use components\Image\Image;
 // This is the index page for modules
 $out = '';
 $db = \cms\DbConnect\connect::getInstance()->getConnection();
-$moduleName = 'modul1';
+$moduleName = 'test';
 $module = new module($moduleName);
 $moduleId = $module->getID();
 

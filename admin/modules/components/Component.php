@@ -21,7 +21,11 @@ class Component extends module {
      * @return array
      * init new component
      */
-    public function initNewComponent($componentName, $componentId, $componentIsRequired, $componentIsMultlang): array
+
+    public function initNewComponent($componentName, $componentId, $componentIsRequired, $componentIsMultlang){
+
+    }
+    public function initNewComponentOld($componentName, $componentId, $componentIsRequired, $componentIsMultlang): array
     {
 
         $result = [
@@ -32,16 +36,20 @@ class Component extends module {
         //var
         $getModuleId = $this->getID();
         $getTableName = $this->getTableName();
-        $proceed = true;
 
         //fetch all instances
         $componentInstancesFetch = $this->getAllCurrentComponentInstances();
-        if ($componentInstancesFetch['success'] === true) {
+//        var_dump($componentInstancesFetch);
+        var_dump($componentInstancesFetch['data']);
+        if ($componentInstancesFetch['data']) {
             $componentInstancesAll = $componentInstancesFetch['data'];
+
+            //case 0: no instance
 
             $sql = "INSERT INTO $getTableName (module_id, component_id, component_instance, component_name, component_required, component_multlang) 
                     VALUES (:module_id, :component_id, :instance_id, :component_name, :component_required, :component_multlang)";
-            if ($componentInstancesAll == null) {
+
+            if ($componentInstancesAll) {
                 //create first component in curr module
                 try {
                     $stmt = $this->db->prepare($sql);
@@ -61,6 +69,7 @@ class Component extends module {
                 //ensure that the name is not being already used
                 $componentNamesFetch = $this->getAllCurrentComponentNames();
                 if($componentNamesFetch['success'] === true){
+                    $result['error'] .= "test64";
                     foreach ($componentNamesFetch['data'] as $componentNameFetch) {
                         echo $componentNameFetch['component_name'];
                         if($componentNameFetch['component_name'] === $componentName){
@@ -78,9 +87,9 @@ class Component extends module {
                 $componentInstancesArray = array_column($componentInstancesAll, 'component_instance');
                 $componentInstancesUnique = array_unique($componentInstancesArray);
 
-                if (!empty($componentInstancesUnique && $result['error'] == null && $proceed == true)) {
+                if (!empty($componentInstancesUnique)) {
                     foreach ($componentInstancesUnique as $componentInstance) {
-
+                        echo "legit";
                         try {
                             $stmt = $this->db->prepare($sql);
                             $stmt->execute([
@@ -93,11 +102,11 @@ class Component extends module {
                             ]);
                         } catch (PDOException $e) {
                             $result['error'] .= $e->getMessage();
+                            echo $e->getMessage();
                         }
 
                     }
                 }
-
             }
 
         }

@@ -21,6 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $moduleId = $_SESSION["current_module_id"] ?? null;
     $module = new Module(null, null, $moduleId);
     $component = new Component(null, null, $moduleId);
+//    echo $component->getName() . $component->getTableName();
 
 
     if ($action == "create" && $moduleId != null) {
@@ -30,10 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $componentId = $_SESSION["component_id"];
         $componentIsRequired = $_POST["component_isRequired"] ?? false;
         $componentIsMultlang = $_POST["component_isMultlang"] ?? false;
-
         $res = $component->initNewComponent($componentName, $componentId, $componentIsRequired, $componentIsMultlang);
-        //unused res var
-        header("Location: ../../modules/index.php");
+
+//        header("Location: ../../modules/index.php");
 
 
     } else if ($action == "delete") {
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ':component_id' => $componentId,
                     ':component_name' => $componentName
                 ]);
-
+//
                 header("Location: ../../modules/index.php");
             } catch (PDOException $e) {
                 echo "Error: " . $e->getMessage();
