@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $componentIsMultlang = $_POST["component_isMultlang"] ?? false;
         $res = $component->initNewComponent($componentName, $componentId, $componentIsRequired, $componentIsMultlang);
 
-//        header("Location: ../../modules/index.php");
+        header("Location: ../../modules/index.php");
 
 
     } else if ($action == "delete") {
@@ -70,71 +70,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $moduleId = $_SESSION['current_module_id'];
             $componentPassArray = $_SESSION['component_pass_data_insert'];
 
-            foreach ($componentPassArray as $component){
-                if(is_array($component)){
-                    $componentId = $component['component_id'];
-                    $componentName = $component['component_name'];
-                    $componentIsMultlang = $component['component_multlang'];
-                    $componentData = $_POST['component_' . $componentName] ?? '';
-                    echo $componentName . $componentIsMultlang;
+             //Check if the componentPassArray is an array
+            if (is_array($componentPassArray)) {
+                try {
+                    // Loop through each component in the pass array
+                    foreach ($componentPassArray as $component) {
+                        // Check if each component is an array
+                        if(is_array($component)){
+                            $componentId = $component['component_id'];
+                            $componentName = $component['component_name'];
+                            $componentIsMultlang = $component['component_multlang'];
+                            $componentData = $_POST['component_' . $componentName] ?? '';
+                            echo $componentName . $componentIsMultlang;
 
-                    if($componentIsMultlang == 1){
-                        $componentDataEn =  $_POST['component_en_' . $componentName] ?? '';
+                            if($componentIsMultlang == 1){
+                                $componentDataEn =  $_POST['component_en_' . $componentName] ?? '';
+                            }else{
+                                $componentDataEn = '';
+                            }
+
+                            if ($componentId === 2) {
+                                $image = new \components\Image\Image(null, null, $moduleId);
+                                $res = $image->uploadImage($componentData);
+                                $componentData = $res['data'];
+                            }
+
+                            $getTableName = $module->getTableName();
+
+                            //now we got all field data and we are ready to insert them
+                            try {
+                                $sql = "INSERT INTO $getTableName
+                                (module_id, component_id, component_instance, component_data, component_data_en, component_name)
+                                VALUES
+                                (:module_id, :component_id, :instance_id, :component_data, :component_data_en, :component_name)";
+
+                                $stmt = $db->prepare($sql);
+                                $stmt->execute([
+                                    ':module_id' => $moduleId,
+                                    ':component_id' => $componentId,
+                                    ':instance_id' => $instance,
+                                    ':component_data' => $componentData,
+                                    ':component_data_en' => $componentDataEn,
+                                    ':component_name' => $componentName
+                                ]);
+
+                            } catch (PDOException $e) {
+                                echo "Error: " . $e->getMessage();
+                            }
+                        } else {
+                            echo "Expected an array for a component but got: " . htmlspecialchars($component) . "<br>";
+                        }
                     }
+                } catch (PDOException $e) {
+                    echo "Error: " . $e->getMessage();
                 }
+
+            } else {
+                echo "No component pass data available.";
             }
-
-
-            // Check if the componentPassArray is an array
-//            if (is_array($componentPassArray)) {
-//                try {
-//                    // Loop through each component in the pass array
-//                    foreach ($componentPassArray as $component) {
-//                        // Check if each component is an array
-//                        if (is_array($component)) {
-//                            // Access the component ID and name
-//                            $componentId = $component[0]; // First element: component ID
-//                            $componentName = $component[1]; // Second element: component Name
-//                            $componentData = $_POST['component_' . $componentName] ?? null;// get value
-//
-//                            if ($componentId === 2) {
-//                                $image = new \components\Image\Image(null, null, $moduleId);
-//                                $res = $image->uploadImage($componentData);
-//                                $componentData = $res['data'];
-//                            }
-//
-//                            $getTableName = $module->getTableName();
-//
-//                            //now we got all field data and we are ready to insert them
-//                            try {
-//                                $sql = "INSERT INTO $getTableName
-//                                (module_id, component_id, component_instance, component_data, component_name)
-//                                VALUES
-//                                (:module_id, :component_id, :instance_id, :component_data, :component_name)";
-//
-//                                $stmt = $db->prepare($sql);
-//                                $stmt->execute([
-//                                    ':module_id' => $moduleId,
-//                                    ':component_id' => $componentId,
-//                                    ':instance_id' => $instance,
-//                                    ':component_data' => $componentData,
-//                                    ':component_name' => $componentName
-//                                ]);
-//
-//                            } catch (PDOException $e) {
-//                                echo "Error: " . $e->getMessage();
-//                            }
-//                        } else {
-//                            echo "Expected an array for a component but got: " . htmlspecialchars($component) . "<br>";
-//                        }
-//                    }
-//                } catch (PDOException $e) {
-//                    echo "Error: " . $e->getMessage();
-//                }
-//
-//            } else {
-//                echo "No component pass data available.";
-//            }
         } else {
             echo "No component pass data available.";
         }

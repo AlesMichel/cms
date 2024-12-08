@@ -36,11 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["newInstance"] = $newInstance;
         $_SESSION["current_module_id"] = $moduleId;
         $_SESSION["component_pass_data_insert"] = [];
-        var_dump($moduleComponents);
+//        var_dump($moduleComponents);
         $out .= "<form action='components/process.php' method='post'>";
         // Loop through each component and process
 //        $componentFetch->getComponentFields($moduleComponents);
-        echo $componentFetch->getComponentFields($moduleComponents);
+        $out .= $componentFetch->getComponentFields($moduleComponents);
         foreach ($moduleComponents as $component) {
             $componentId = $component['component_id'];
             $componentName = $component['component_name'];

@@ -165,31 +165,7 @@ class ComponentsFetch extends Component {
         return $out;
     }
 
-    public function getAllCurrentComponentNames(): array {
-        $result = [
-            'success' => false,
-            'data' => null,
-            'error' => null,
-        ];
 
-        try {
-            $sql = "SELECT component_name FROM " . $this->getTableName() . " WHERE module_id = :module_id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(["module_id" => $this->getID()]);
-            $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if ($instances) { // Query succeeded
-                $result['success'] = true;
-                $result['data'] = $instances;
-            } else {
-                $result['error'] .= 'Query failed or returned no results.';
-            }
-        } catch (PDOException $e) {
-            $result['error'] .= "Error fetching module data: " . $e->getMessage();
-        }
-
-        return $result;
-    }
 
 
 }

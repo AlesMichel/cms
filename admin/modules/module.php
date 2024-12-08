@@ -547,12 +547,11 @@ class module
             $instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-
-                if($instances){
-                    $result["success"] = true;
-                    $result["data"] = $instances;
+            $result["success"] = true;
+            if($instances){
+                $result["data"] = $instances;
                 }else{
-                    $result["data"] = -1;
+                $result["data"] = -1;
                 }
 
         }catch (PDOException $e) {
