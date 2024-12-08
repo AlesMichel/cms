@@ -17,8 +17,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //get module id and instance id, so I know where to update data
     $moduleId = $_SESSION['current_module_id'];
     $instance = $_POST["instance_id"];
+    $componentFetch = new ComponentsFetch(null, null, $moduleId);
     // Fetch the module components
-    $moduleComponents = module::getModuleDataForInstance($moduleId, $instance, $db);
+    $moduleComponents = $componentFetch->getModuleDataForInstance($instance)['data'];
 //    var_dump($moduleComponents);
     if (!empty($moduleComponents)) {
 
@@ -28,15 +29,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $out .= "<form action='components/process.php' method='post'>";
         // Loop through each component and process
-        foreach ($moduleComponents as $component) {
-            $componentId = $component['component_id'];
-            $componentName = $component['component_name'];
-            $componentData = $component['component_data'];
-            // Add current component's data to the session array
-            $_SESSION["component_pass_data_update"][] = [$componentId, $componentName];
-            // creates the fields
-            $out .= ComponentsFetch::editComponentData($componentId, $componentName, $componentData , $db);
-        }
+//        foreach ($moduleComponents as $component) {
+//            $componentId = $component['component_id'];
+//            $componentName = $component['component_name'];
+//            $componentData = $component['component_data'];
+//            // Add current component's data to the session array
+//            $_SESSION["component_pass_data_update"][] = [$componentId, $componentName];
+//            // creates the fields
+////            $out .= ComponentsFetch::editComponentData($componentId, $componentName, $componentData , $db);
+//
+//        }
+        $out .= $componentFetch->getComponentFields($moduleComponents, true);
 
         $out .= "<input type='hidden' name='instance_id' value='$instance'>";
         $out .= "<button name='action' value='updateData' class='mt-3 btn btn-primary'>Vložit</button>";

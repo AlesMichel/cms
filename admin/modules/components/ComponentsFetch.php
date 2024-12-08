@@ -18,8 +18,6 @@ class ComponentsFetch extends Component {
         parent::__construct($moduleName, $tableName, $moduleId);
     }
 
-
-
     public static function fetchAllComponents($db) {
         try {
             $sql = 'SELECT * FROM components';
@@ -63,9 +61,8 @@ class ComponentsFetch extends Component {
         //build field
         if($componentId === null) {
             echo "No component found";
-        }elseif($componentId == 1) {
+        }else if($componentId == 1) {
             $out .= TextField::getFields();
-
         }elseif($componentId == 2) {
             $out .= Image::getFields();
         } elseif($componentId == 3) {
@@ -107,63 +104,106 @@ class ComponentsFetch extends Component {
             echo "Error: " . $e->getMessage();
         }
     }
-    public function getComponentFields($insertArray): string
+    public function getComponentType($componentId){
+        try{
+            $sql = 'SELECT component_type FROM components WHERE id = :component_id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':component_id', $componentId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $componentType = $row["component_type"];
+            if($componentType){
+                return $componentType;
+            }else{
+                return false;
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+        return $componentType;
+    }
+    public function getComponentFields($insertArray, $edit = false): string
     {
         $out = '';
-        foreach($insertArray as $component){
-            $getComponentName = $component['component_name'];
-            $getComponentId = $component['component_id'];
-            $getComponentIsRequired = $component['component_required'];
-            $getComponentIsMultlang = $component['component_multlang'];
+        if($edit){
+            foreach($insertArray as $component){
+                $getComponentName = $component['component_name'];
+                $getComponentId = $component['component_id'];
+                $getComponentIsRequired = (int)$component['component_required'];
+                $getComponentIsMultlang = (int)$component['component_multlang'];
+                $getComponentData = $component['component_data'];
+                $getComponentDataEn = $component['component_data_en'];
 
-            echo $getComponentId;
-            if($getComponentId == 1){
-                $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
-                $out .= $textField->getDataFieldsForInsert();
-            }else{
-                $out .= 'No data fields found';
+                $_SESSION["component_pass_data_update"][] = [$getComponentId, $getComponentName];
+
+                if($getComponentId == 1){
+                    $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang, $getComponentData, $getComponentDataEn);
+                    $out .= $textField->getDataFieldsForEdit();
+                }else if($getComponentId == 2){
+//                    $out .= Image::getDataFieldsForEdit($getComponentName);
+                }
+                else{
+                    $out .= 'No data fields found';
+                }
             }
         }
-        return $out;
-    }
-
-
-    public static function insertComponentData($componentId, $componentName, $db): string
-    {
-        $componentType = self::findComponentTypeById($componentId, $db);
-        $out = '';
-        if($componentType == 'text'){
-            $out .= TextField::getDataFieldsForEdit($componentId,$componentName, '');
-        }elseif($componentType == 'image'){
-            $out .= Image::getDataFieldsForEdit($componentId,$componentName, '');
-        }
         else{
-            $out .= 'No data fields found';
+            foreach($insertArray as $component){
+                $getComponentName = $component['component_name'];
+                $getComponentId = $component['component_id'];
+                $getComponentIsRequired = $component['component_required'];
+                $getComponentIsMultlang = $component['component_multlang'];
+
+                if($getComponentId == 1){
+                    $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
+                    $out .= $textField->getDataFieldsForInsert();
+                }else{
+                    $out .= 'No data fields found';
+                }
+            }
         }
+
+
         return $out;
     }
 
-    public static function insertComponentDataFromArray(array $components, $db ){
 
-    }
+//    public static function insertComponentData($componentId, $componentName, $db): string
+//    {
+////        $componentType = self::findComponentTypeById($componentId, $db);
+//        $componentType = $this->getComponentType($componentId);
+//        $out = '';
+//        if($componentType == 'text'){
+//            $out .= TextField::getDataFieldsForEdit($componentId,$componentName, '');
+//        }elseif($componentType == 'image'){
+//            $out .= Image::getDataFieldsForEdit($componentId,$componentName, '');
+//        }
+//        else{
+//            $out .= 'No data fields found';
+//        }
+//        return $out;
+//    }
 
-    public static function editComponentData($componentId, $componentName, $componentData, $db): string
-    {
-        $componentType = self::findComponentTypeById($componentId, $db);
-        $out = '';
-        if($componentType == 'text'){
-            $out .= TextField::getDataFieldsForEdit($componentId,$componentName, $componentData);
-        }elseif ($componentType == 'image'){
-//            $out .= Image::viewImage($componentData);
-            $out .= Image::getDataFieldsForEdit($componentId,$componentName, $componentData);
-        }elseif($componentType = 'position'){
-            $out .= Position::getDataFieldsForEdit($componentName,$componentData);
-        }
-        else{
-            $out .= 'No data fields found';
-        }
-        return $out;
-    }
+//    public function editComponentData($componentArray): string
+//    {
+//
+////        $componentType = self::findComponentTypeById($componentId, $db);
+//        $componentType = $this->getComponentType($componentId);
+//        $out = '';
+//        if($componentType == 'text'){
+//            $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
+//            $out .= $textField->getDataFieldsForInsert();
+//        }elseif ($componentType == 'image'){
+////            $out .= Image::viewImage($componentData);
+//            $out .= Image::getDataFieldsForEdit($componentId,$componentName, $componentData);
+//        }elseif($componentType = 'position'){
+//            $out .= Position::getDataFieldsForEdit($componentName,$componentData);
+//        }
+//        else{
+//            $out .= 'No data fields found';
+//        }
+//        return $out;
+//    }
 
 
 

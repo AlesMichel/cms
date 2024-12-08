@@ -26,7 +26,6 @@ if ($moduleName) {
     $moduleComponents = $module->getModuleData();
 //    $highestInstance = component::getLastInstance($moduleId, $db);
     $highestInstance = $module->getHighestInstance()['data'];
-
     // Check if any components are found for this module
     if (empty($moduleComponents)) {
         $out .= "<p>No components found for this module.</p>";
@@ -75,14 +74,16 @@ if ($moduleName) {
                     // Start the table row
                     if ($component['component_instance'] > 0) {
                         $out .= "<tr>";
-                        // Check if the component ID indicates an image component (e.g., ID 2)
-                        if ($component['component_id'] == 2) {
-                            $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
-                            $out .= "<td>" . Image::viewImage($component['component_data']) . "</td>"; // Display image
-                        } else {
+
+                    if($component['component_id'] == 1) {
                             // Otherwise, display the component name and data as plain text
                             $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
                             $out .= "<td>" . htmlspecialchars($component['component_data']) . "</td>";
+                        }
+
+                    else if ($component['component_id'] == 2) {
+                            $out .= "<td>" . htmlspecialchars($component['component_name']) . "</td>";
+                            $out .= "<td>" . Image::viewImage($component['component_data']) . "</td>"; // Display image
                         }
 
                         // Close the table row

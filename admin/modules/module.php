@@ -78,7 +78,7 @@ class module
 
             // Case: Neither moduleId nor moduleName is provided
             default:
-                echo "Module name or ID must be provided.";
+//                echo "Module name or ID must be provided.";
                 break;
         }
     }
@@ -397,32 +397,36 @@ class module
         }
         return $result;
     }
-    public static function getModuleDataForInstance(int $moduleId, int $instance, PDO $db)
+    public function getModuleDataForInstance($instance): array
     {
 
-        // Step 1: Fetch all components that match module ID
-        $moduleTableName = self::findModuleTableById($moduleId, $db);
-        if ($moduleTableName) {
+        $result = [
+            'success' => false,
+            'data' => null,
+            'error' => null,
+        ];
+        if ($this->tableName) {
+
             try {
-
-                $sql = "SELECT * FROM $moduleTableName WHERE module_id = :moduleId AND component_instance = :component_instance";
-                $stmt = $db->prepare($sql);
-                $stmt->execute([':moduleId' => $moduleId, ':component_instance' => $instance]);
+                $sql = "SELECT * FROM $this->tableName WHERE module_id = :moduleId AND component_instance = :component_instance";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([':moduleId' => $this->moduleId, ':component_instance' => $instance]);
                 $moduleComponents = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
                 if (!empty($moduleComponents)) {
-                    return $moduleComponents;
-                } else {
-                    return "This module has no components";
-                }
 
+                    $result['data'] = $moduleComponents;
+                    $result['success'] = true;
+
+                } else {
+                    $result['error'] = "This module has no components";
+                }
             } catch (PDOException $e) {
-                echo "Error fetching module data: " . $e->getMessage();
-                return null;
+                $result['error'] = "Error fetching module data: " . $e->getMessage();
             }
         } else {
-            return "Module table not found";
+            $result['error'] = "Module table does not exists";
         }
+        return $result;
     }
     public function getModuleComponentListForEdit(): array
     {
@@ -561,8 +565,10 @@ class module
         }
         return $result;
     }
-    public function getHighestInstance(){
+    public function getHighestInstance(): array
+    {
         $getModuleTable = $this->getTableName();
+        $moduleId = $this->getID();
         $result = [
             'success' => false,
             'data' => null,
@@ -575,10 +581,11 @@ class module
             $stmt->bindParam(':module_id', $moduleId, PDO::PARAM_INT);
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if($row['highest_instance']){
-                $result["success"] = true;
-                $result["data"] = $row['highest_instance'];
+            $result["success"] = true;
+            if($row['highest_instance'] !== null){
+                $result["data"] = (int)$row['highest_instance'];
+            } else {
+                $result['data'] = 0; // Return 0 if no instances are found.
             }
 
         }catch (PDOException $e) {

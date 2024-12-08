@@ -76,8 +76,8 @@ class Image extends Component
         return $result;
     }
 
-    ///ai
-    public static function getDataFieldsForEdit($componentId ,$componentName, $componentData): string{
+    //chat
+    public static function getDataFieldsForEdit($componentName, $componentData): string{
         $out = '';
         $out .= "
         <label for='image".$componentName."' class='form-label'>" . $componentName ."</label>";
@@ -95,9 +95,6 @@ class Image extends Component
         $out .= '<button class="btn btn-primary mt-3 d-none" id="cropBtn' . $componentName .'">Použít</button>';
         $out .= "<input class='d-none' type='text' id='dataPassImg" . $componentName . "' value='" . $componentData . "' name='component_" . $componentName ."' />";
         $out .= "<input onchange='handleImageUpload(this,\"".$componentName."\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
-
-
-
 
         return $out;
     }

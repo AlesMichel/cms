@@ -12,7 +12,7 @@ class TextField extends Component{
     protected string $componentData = '';
     protected string $componentDataEn = '';
 
-    public function __construct($componentName, $componentId, $componentIsRequired, $componentIsMultlang, $componentData = null, $componentDataEN = null) {
+    public function __construct($componentName, $componentId, int $componentIsRequired, int $componentIsMultlang, $componentData = null, $componentDataEN = null) {
         parent::__construct();
         $this->componentName = $componentName;
         $this->componentId = $componentId;
@@ -50,25 +50,50 @@ class TextField extends Component{
     ";
 
     }
-    public static function getDataFields($componentId ,$componentName): string{
-        return "
-        <label for='textField_" .$componentId. "' class='form-label'>" . $componentName ."</label>
-        <input class='form-control' type='text' id='textField" . $componentId ."' name='component_" . $componentName ."' placeholder='...' required/>";
-    }
-    public static function getDataFieldsForEdit($componentId ,$componentName, $componentData): string{
-        return "
-        <label for='textField_".$componentId."' class='form-label'>" . $componentName ."</label>
-        <input class='form-control' type='text' id='textField".$componentId."' value='".$componentData." ' name='component_" . $componentName ."' placeholder='...' required/>";
+    public function getDataFieldsForEdit(): string{
+        $out = '';
+        if($this->componentIsMultlang === 1){
+
+
+            $out .= "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>".$this->componentName . ' CZ' . "</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='". $this->componentData. "' name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+
+            $out .= "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>".$this->componentName . ' EN' . "</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='". $this->componentDataEn . "' name='component_en_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+        }else{
+            $out = "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>" . $this->componentName . "</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='" . $this->componentData . "' name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+        }
+
+
+
+//        return "
+//        <label for='textField_". $componentId ."' class='form-label'>" . $componentName ."</label>
+//        <input class='form-control' type='text' id='textField".$componentId."' value='".$componentData." ' name='component_" . $componentName ."' placeholder='...' required/>";
+        return $out;
     }
 
     public function getDataFieldsForInsert(): string
     {
-        return "
-        <label for='textField_". $this->componentName ."' class='form-label'>" . $this->componentName ."</label>
-        . ($this->componentIsMultlang) .
-        <input class='form-control' type='text' id='text". $this->componentName."' value=''name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>
-        
-        <input class='form-control' type='text' id='textField".$this->componentName."' value='' name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
-        
+
+        if($this->componentIsMultlang === 1){
+
+            $out = "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>".$this->componentName . ' CZ' . "</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='' name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+
+            $out .= "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>".$this->componentName . ' EN' . "</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='' name='component_en_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+        }else{
+            $out = "<label for='textField_". $this->componentName ."' class='form-label mt-2 mb-1'>".$this->componentName ."</label>";
+
+            $out .= "<input class='form-control' type='text' id='text". $this->componentName."' value='' name='component_" . $this->componentName ."' placeholder='...' " . ($this->componentIsRequired ? 'required' : '') . "/>";
+        }
+        return $out;
+
     }
 }

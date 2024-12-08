@@ -11,7 +11,6 @@ use components\Component;
 use components\ComponentsFetch\ComponentsFetch;
 
 $out ='';
-$db = \cms\DbConnect\connect::getInstance()->getConnection();
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -27,20 +26,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }else{
         $out .= $status['error'];
     }
-
     if (!empty($moduleComponents)) {
         // Get the latest instance
-        //$lastInstance = component::getLastInstance($moduleId, $db);
-        $lastInstance = $componentFetch->getHighestInstance()['data'];
-        $newInstance = $lastInstance + 1;
-        $_SESSION["newInstance"] = $newInstance;
         $_SESSION["current_module_id"] = $moduleId;
         $_SESSION["component_pass_data_insert"] = [];
 //        var_dump($moduleComponents);
         $out .= "<form action='components/process.php' method='post'>";
         // Loop through each component and process
-//        $componentFetch->getComponentFields($moduleComponents);
-        $out .= $componentFetch->getComponentFields($moduleComponents);
+        $out .= $componentFetch->getComponentFields($moduleComponents, false);
         foreach ($moduleComponents as $component) {
             $componentId = $component['component_id'];
             $componentName = $component['component_name'];

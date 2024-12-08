@@ -2,6 +2,7 @@
 
 use cms\Module\module\module;
 use components\Component;
+use components\ComponentsFetch\ComponentsFetch;
 use components\Image\Image;
 
 session_start();
@@ -66,9 +67,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if ($action == "insertData") {
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
-            $instance = $_SESSION['newInstance'];
             $moduleId = $_SESSION['current_module_id'];
             $componentPassArray = $_SESSION['component_pass_data_insert'];
+            $lastInstance = $module->getHighestInstance()['data'];
+            $instance = $lastInstance + 1;
 
              //Check if the componentPassArray is an array
             if (is_array($componentPassArray)) {
@@ -79,12 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         if(is_array($component)){
                             $componentId = $component['component_id'];
                             $componentName = $component['component_name'];
-                            $componentIsMultlang = $component['component_multlang'];
+                            $componentIsMultlang = (int)$component['component_multlang'];
+                            $componentIsRequired = (int)$component['component_required'];
                             $componentData = $_POST['component_' . $componentName] ?? '';
-                            echo $componentName . $componentIsMultlang;
 
-                            if($componentIsMultlang == 1){
-                                $componentDataEn =  $_POST['component_en_' . $componentName] ?? '';
+                            if($componentIsMultlang === 1){
+                                $componentDataEn =  $_POST['component_en_' . $componentName];
                             }else{
                                 $componentDataEn = '';
                             }
@@ -100,9 +102,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             //now we got all field data and we are ready to insert them
                             try {
                                 $sql = "INSERT INTO $getTableName
-                                (module_id, component_id, component_instance, component_data, component_data_en, component_name)
+                                (module_id, component_id, component_instance, component_data, component_data_en, component_name, component_multlang, component_required)
                                 VALUES
-                                (:module_id, :component_id, :instance_id, :component_data, :component_data_en, :component_name)";
+                                (:module_id, :component_id, :instance_id, :component_data, :component_data_en, :component_name, :component_multlang, :component_required)";
 
                                 $stmt = $db->prepare($sql);
                                 $stmt->execute([
@@ -111,7 +113,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ':instance_id' => $instance,
                                     ':component_data' => $componentData,
                                     ':component_data_en' => $componentDataEn,
-                                    ':component_name' => $componentName
+                                    ':component_name' => $componentName,
+                                    ':component_multlang' => $componentIsMultlang,
+                                    ':component_required' => $componentIsRequired,
+
                                 ]);
 
                             } catch (PDOException $e) {
@@ -132,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "No component pass data available.";
         }
 
-//        header("Location: ../../modules/index.php");
+        header("Location: ../../modules/index.php");
     } else if ($action == "updateData") {
         // Ensure the session data is available
         if (isset($_SESSION['component_pass_data'])) {
@@ -152,7 +157,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Access the component ID and name
                             $componentId = $component[0]; // First element: component ID
                             $componentName = $component[1]; // Second element: component Name
-                            $componentData = $_POST['component_' . $componentName] ?? null;
+                            $componentData = $_POST['component_' . $componentName] ?? '';
+                            $componentDataEn = $_POST['component_en' . $componentName] ?? '';
                             $getTableName = $module->getTableName();
 
                             if ($componentId === 2) {
@@ -167,9 +173,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
                                 $sql = "UPDATE $getTableName 
-                                SET component_data = :component_data, 
-                                    component_name = :component_name 
+                                SET component_data = :component_data,
+                                    component_data_en = :component_data_en,
+                    
                                 WHERE module_id = :module_id 
+                                AND component_name = :component_name
                                 AND component_id = :component_id 
                                 AND component_instance = :instance_id";
 
@@ -179,6 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ':component_id' => $componentId,
                                     ':instance_id' => $instance,
                                     ':component_data' => $componentData,
+                                    ':component_data_en' => $componentDataEn,
                                     ':component_name' => $componentName
                                 ]);
 

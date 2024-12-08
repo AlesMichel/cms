@@ -32,6 +32,7 @@ class Component extends module
             'data' => null,
             'error' => null,
         ];
+        $proceed = false;
         $tableName = $this->getTableName();
 
         $sql = "INSERT INTO $tableName (module_id, component_id, component_instance, component_name, component_required, component_multlang) 
@@ -67,12 +68,13 @@ class Component extends module
                 $componentInstancesAll = $componentInstancesFetch['data'];
                 $componentNamesFetch = $this->getAllCurrentComponentNames();
                 if ($componentNamesFetch['success'] === true) {
-                    $result['error'] .= "test64";
                     foreach ($componentNamesFetch['data'] as $componentNameFetch) {
-                        echo $componentNameFetch['component_name'];
+
                         if ($componentNameFetch['component_name'] === $componentName) {
                             $_SESSION['cms_message_error'] = 'Komponent se stejným název už existuje';
-
+                            $proceed = false;
+                        }else{
+                            $proceed = true;
                         }
                     }
                 } else {
@@ -85,7 +87,7 @@ class Component extends module
                 $componentInstancesArray = array_column($componentInstancesAll, 'component_instance');
                 $componentInstancesUnique = array_unique($componentInstancesArray);
 
-                if (!empty($componentInstancesUnique)) {
+                if (!empty($componentInstancesUnique) and $proceed === true) {
                     foreach ($componentInstancesUnique as $componentInstance) {
                     
                         try {
@@ -100,35 +102,17 @@ class Component extends module
                             ]);
                         } catch (PDOException $e) {
                             $result['error'] .= $e->getMessage();
-                            echo $e->getMessage();
                         }
 
                     }
                 }
             }
-
-
         }
 
 
         return $result;
     }
 
-
-
-    /**
-     * @param $data
-     * @return void
-     */
-    public function insertDataIntoComponent($data)
-    {
-        foreach ($data as $component) {
-            $componentName = $component['componentName'];
-            $componentId = $component['componentId'];
-            $componentIsRequired = $component['componentIsRequired'];
-            $componentIsMultlang = $component['componentIsMultlang'];
-        }
-    }
 
     /**
      * Method for getting all current names for current module
