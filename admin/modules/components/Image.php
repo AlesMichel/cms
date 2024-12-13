@@ -5,8 +5,12 @@ use components\Component;
 
 class Image extends Component
 {
-    protected $placeholder = 'Text...';
-
+    protected string $componentName;
+    protected int $componentId;
+    protected int $componentIsRequired;
+    protected int $componentIsMultlang;
+    protected string $componentData = '';
+    protected string $componentDataEn = '';
 
     public static function getFields(): string
     {

@@ -140,7 +140,8 @@ class ComponentsFetch extends Component {
                     $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang, $getComponentData, $getComponentDataEn);
                     $out .= $textField->getDataFieldsForEdit();
                 }else if($getComponentId == 2){
-//                    $out .= Image::getDataFieldsForEdit($getComponentName);
+
+                    $out .= Image::getDataFieldsForEdit($getComponentName);
                 }
                 else{
                     $out .= 'No data fields found';
