@@ -12,16 +12,42 @@ class Image extends Component
     protected string $componentData = '';
     protected string $componentDataEn = '';
 
+    public function __construct($componentName, $componentId, int $componentIsRequired, int $componentIsMultlang, $componentData = null, $componentDataEN = null) {
+        parent::__construct();
+        $this->componentName = $componentName;
+        $this->componentId = $componentId;
+        $this->componentIsRequired = $componentIsRequired;
+        $this->componentIsMultlang = $componentIsMultlang;
+        if($componentData !== null){
+            $this->componentData = $componentData;
+        }
+        if($componentDataEN !== null){
+            $this->componentDataEn = $componentDataEN;
+        }
+    }
+
     public static function getFields(): string
     {
         return "
-        <label class='mt-3' for='textField' class='form-label'>Název komponenty</label>
-        <input class='form-control' type='text' id='textField' name='component_name' placeholder='...' required/>";
-    }
-    public static function getDataFields($componentId ,$componentName): string{
-        return "
-        <label for='textField_" .$componentId. "' class='form-label'>" . $componentName ."</label>
-        <input class='form-control' type='file' id='textField" . $componentId ."' name='component_" . $componentName ."' placeholder='...' required/>";
+        <label for='textField' class='form-label mt-3'>Název komponenty</label>
+        <input class='form-control' type='text' id='textField' name='component_name' placeholder='...' required/>
+        
+        <div class='mt-3'>
+            <div class='form-check form-switch'>
+            <input type='hidden' name='component_isRequired' value='0'>
+            <input name='component_isRequired' class='form-check-input' type='checkbox' id='isRequired' checked value='1'/>
+            <label class='form-check-label' for='isRequired'>Komponenta je povinná</label>
+            </div>
+         </div>
+         
+        <div class='my-3'>
+            <div class='form-check form-switch'>
+            <input type='hidden' name='component_isMultlang' value='0'>
+            <input name='component_isMultlang' class='form-check-input' type='checkbox' id='isMultilang' checked value='1'/>
+            <label class='form-check-label' for='isMultilang'>Komponenta je vícejazyčná</label>
+            </div>
+        </div>
+    ";
     }
 
     //ai
@@ -42,7 +68,7 @@ class Image extends Component
         }
     }
 
-    public function uploadImage($src): array
+    public static function uploadImage($src): array
     {
         $result = [
             'success' => false,
@@ -80,25 +106,39 @@ class Image extends Component
         return $result;
     }
 
-    //chat
-    public static function getDataFieldsForEdit($componentName, $componentData): string{
-        $out = '';
-        $out .= "
-        <label for='image".$componentName."' class='form-label'>" . $componentName ."</label>";
+    public function getDataFieldsForEdit(): string
+    {
+        $out = "
+    <label for='image" . $this->componentName . "' class='form-label'>" . $this->componentName . "</label>";
 
-        if ($componentData) {
-
-            $out .='<p>';
-            $out .= self::viewImage($componentData);
-            $out .='</p>';
-        } else {
-            $out .= ' / Záznam zatím nemá data'; // Message if there's no data
+        if ($this->componentData) {
+            $out .= '<p>';
+            $out .= self::viewImage($this->componentData);
+            $out .= '</p>';
         }
 
-        $out .= '<img id="imagePreview' . $componentName . '" src="" class="img-thumbnail d-none" />';
-        $out .= '<button class="btn btn-primary mt-3 d-none" id="cropBtn' . $componentName .'">Použít</button>';
-        $out .= "<input class='d-none' type='text' id='dataPassImg" . $componentName . "' value='" . $componentData . "' name='component_" . $componentName ."' />";
-        $out .= "<input onchange='handleImageUpload(this,\"".$componentName."\")' type='file' name='input_" . $componentName ."' class='form-control mt-3' id='image".$componentName."' accept='image/png, image/gif, image/jpeg image/webp'/>";
+        $out .= '<img id="imagePreview' . $this->componentName . '" src="" class="img-thumbnail d-none" />';
+        $out .= '<button class="btn btn-primary mt-3 d-none" id="cropBtn' . $this->componentName . '">Použít</button>';
+        $out .= "<input class='d-none' type='text' id='dataPassImg" . $this->componentName . "' value='" . $this->componentData . "' name='component_" . $this->componentName . "' />";
+        $out .= "<input onchange='handleImageUpload(this, \"" . $this->componentName . "\")' type='file' name='input_" . $this->componentName . "' class='form-control mt-3' id='image" . $this->componentName . "' accept='image/png, image/gif, image/jpeg, image/webp' />";
+
+        return $out;
+    }
+    public function getDataFieldsForInsert(): string
+    {
+        $out = "
+    <label for='image" . $this->componentName . "' class='form-label'>" . $this->componentName . "</label>";
+
+        if ($this->componentData) {
+            $out .= '<p>';
+            $out .= self::viewImage($this->componentData);
+            $out .= '</p>';
+        }
+
+        $out .= '<img id="imagePreview' . $this->componentName . '" src="" class="img-thumbnail d-none" />';
+        $out .= '<button class="btn btn-primary mt-3 d-none" id="cropBtn' . $this->componentName . '">Použít</button>';
+        $out .= "<input class='d-none' type='text' id='dataPassImg" . $this->componentName . "' value='" . $this->componentData . "' name='component_" . $this->componentName . "' />";
+        $out .= "<input onchange='handleImageUpload(this, \"" . $this->componentName . "\")' type='file' name='input_" . $this->componentName . "' class='form-control mt-3' id='image" . $this->componentName . "' accept='image/png, image/gif, image/jpeg, image/webp' />";
 
         return $out;
     }

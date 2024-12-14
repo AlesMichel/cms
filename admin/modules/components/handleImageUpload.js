@@ -4,7 +4,7 @@ function handleImageUpload(inputElement, componentName) {
     const cropBtnId = 'cropBtn' + componentName;
     cropBtnId.toString()
     console.log(cropBtnId)
-    const hiddenInputId = 'dataPassImgObrazek';
+    const hiddenInputId = 'dataPassImg' + componentName;
     // Resetting the preview image
     const previewImage = document.getElementById(previewId);
     const cropBtn = document.getElementById(cropBtnId);

@@ -92,8 +92,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             }
 
                             if ($componentId === 2) {
-                                $image = new \components\Image\Image(null, null, $moduleId);
-                                $res = $image->uploadImage($componentData);
+
+                                $res =  Image::uploadImage($componentData);
                                 $componentData = $res['data'];
                             }
 
@@ -162,8 +162,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $getTableName = $module->getTableName();
 
                             if ($componentId === 2) {
-                                $image = new \components\Image\Image(null, null, $moduleId);
-                                $res = $image->uploadImage($componentData);
+//                                $image = new \components\Image\Image(null, null, $moduleId);
+//                                $res = $image->uploadImage($componentData);
+                                $res = Image::uploadImage($componentData);
                                 var_dump($res);
                                 $componentData = $res['data'];
                             }

@@ -48,8 +48,8 @@ class TextField extends Component{
             </div>
         </div>
     ";
-
     }
+
     public function getDataFieldsForEdit(): string{
         $out = '';
         if($this->componentIsMultlang === 1){

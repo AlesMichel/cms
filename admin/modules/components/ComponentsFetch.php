@@ -141,7 +141,9 @@ class ComponentsFetch extends Component {
                     $out .= $textField->getDataFieldsForEdit();
                 }else if($getComponentId == 2){
 
-                    $out .= Image::getDataFieldsForEdit($getComponentName);
+                    $image = new Image($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang, $getComponentData, $getComponentDataEn);
+                    $out .= $image->getDataFieldsForEdit();
+
                 }
                 else{
                     $out .= 'No data fields found';
@@ -158,7 +160,11 @@ class ComponentsFetch extends Component {
                 if($getComponentId == 1){
                     $textField = new TextField($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
                     $out .= $textField->getDataFieldsForInsert();
-                }else{
+                }else if($getComponentId == 2){
+                    $image = new Image($getComponentName, $getComponentId, $getComponentIsRequired, $getComponentIsMultlang);
+                    $out .= $image->getDataFieldsForInsert();
+                }
+                else{
                     $out .= 'No data fields found';
                 }
             }
