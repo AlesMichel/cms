@@ -2,9 +2,9 @@ PHP component based headless cms
 -----------------------------------
 <ul>
 <li>PHP 7.2+</li>
-<li>SQL INNODB - does not generate</li>
-<li>base SQL Structure</li>
-<li>NO COMPOSER, VANILA PHP</li><ul>
+<li>NO COMPOSER, VANILA PHP</li>
+<li>SQL Structure not included</li>
+  <ul>
 <br>
 
 
